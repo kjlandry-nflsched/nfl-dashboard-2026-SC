@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>2026 NFL Schedule Dashboard - Version 11</title>
+<title>2026 NFL Schedule Dashboard - Version 14</title>
 <style>
 :root{
   --bg:#0b0b0b;--bg2:#171200;--panel:#141414;--panel2:#1f1a07;--text:#fff8e6;--muted:#cdbf95;
@@ -33,6 +33,32 @@ main{max-width:1400px;margin:0 auto;padding:24px 20px 56px}.hero{display:grid;gr
 .commandHero{margin-top:16px;border:1px solid var(--border);border-left:8px solid var(--accent);border-radius:22px;padding:18px;background:linear-gradient(135deg,var(--field),var(--panel2));display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}.teamBadge{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--activeText);font-weight:950;font-size:22px;box-shadow:0 10px 24px var(--shadow)}.teamPills{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.teamPill{display:inline-flex;align-items:center;justify-content:center;min-width:46px;height:30px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:950;letter-spacing:.04em;border:1px solid rgba(255,255,255,.22);box-shadow:0 6px 14px rgba(0,0,0,.18);color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35)}body.light .teamPill{box-shadow:0 4px 10px rgba(12,35,64,.16);border-color:rgba(12,35,64,.18)}.matchLine{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.teamPillMini{min-width:38px;height:24px;font-size:11px;padding:0 8px}.primeStrip{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}.primeItem{background:var(--game);border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:16px;padding:12px}.homeAway{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}.commandHeroTitle{font-size:26px;font-weight:950;letter-spacing:-.03em}.commandHeroMeta{color:var(--muted);font-size:13px;margin-top:4px}.commandHeroCountdown{text-align:right}.commandHeroCountdown .value{font-size:24px;font-weight:950;color:var(--accent2)}.divisionBoard{margin-top:14px;background:var(--field);border:1px solid var(--border);border-radius:18px;padding:16px}.divisionTeams{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.divisionChip{border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:999px;padding:8px 11px;background:var(--game);font-weight:850}.printNote{display:none}
 .commandSubtabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 12px}.commandSubtab{border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:999px;padding:10px 13px;font-weight:900;cursor:pointer}.commandSubtab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--activeText);border-color:var(--accent)}body.light .commandSubtab.active{background:linear-gradient(135deg,var(--lightTeamMain,#0c2340),var(--lightTeamMain2,#164978));color:var(--lightActiveText,#fff)}.commandPane{display:none;margin-top:12px}.commandPane.active{display:block}.scheduleDisclosure{margin-top:16px;border:1px solid var(--border);border-radius:20px;background:linear-gradient(180deg,var(--field),var(--panel2));overflow:hidden}.scheduleDisclosure summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;font-weight:950;color:var(--text);border-left:6px solid var(--accent)}.scheduleDisclosure summary::-webkit-details-marker{display:none}.scheduleDisclosure summary:before{content:'+';display:inline-grid;place-items:center;width:26px;height:26px;border-radius:999px;background:var(--accent);color:var(--activeText);margin-right:10px;flex:0 0 26px}.scheduleDisclosure[open] summary:before{content:'–'}.scheduleDisclosure summary span:first-child{margin-right:auto}.summaryMeta{font-size:12px;color:var(--muted);font-weight:800}.scheduleDisclosure .steelersSchedule{padding:0 14px 16px}body.light .scheduleDisclosure summary{border-left-color:var(--lightTeamMain,#0c2340)}body.light .scheduleDisclosure summary:before{background:var(--lightTeamMain,#0c2340);color:var(--lightActiveText,#fff)}
 @media print{body{background:#fff!important;color:#000!important;border-top:0}.tabs-wrap,.toolbar,.teamPanel:nth-of-type(2),#teamResults,#teamHint{display:none!important}header,main{max-width:none;padding:10px}.hero{grid-template-columns:1fr}.card,.game,.teamResult,.statBox{box-shadow:none!important;border-color:#999!important;background:#fff!important;color:#000!important}.groupHeader:after{background:#999}.network,.statValue,.num,.wk{color:#000!important}.printNote{display:block;color:#000;margin:8px 0}.games{grid-template-columns:repeat(2,1fr)}}
+
+
+.cornerStatus{position:absolute;right:20px;top:20px;min-width:190px;max-width:240px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-right:6px solid var(--accent);border-radius:18px;padding:12px 14px;box-shadow:0 12px 30px var(--shadow);text-align:right}
+.cornerStatus .ver{font-size:26px;font-weight:950;letter-spacing:-.04em;color:var(--accent);line-height:1}
+.cornerStatus .stampLabel{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-top:8px}
+.cornerStatus .stamp{font-size:12px;color:var(--text);font-weight:800;line-height:1.25;margin-top:3px}
+body.light .cornerStatus{border-right-color:var(--lightTeamMain,#0c2340)}
+body.light .cornerStatus .ver{color:var(--lightTeamMain,#0c2340)}
+@media(max-width:900px){.cornerStatus{position:static;margin-top:14px;text-align:left;max-width:none;border-right:1px solid var(--border);border-left:6px solid var(--accent)}body.light .cornerStatus{border-left-color:var(--lightTeamMain,#0c2340)}}
+
+.statusCard{margin-bottom:18px;border-left:7px solid var(--accent)}
+.statusHeader{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.statusTitle{font-size:20px;font-weight:950;letter-spacing:-.02em}
+.statusGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.statusMetric{background:var(--field);border:1px solid var(--border);border-radius:16px;padding:13px}
+.statusMetric .value{font-size:20px;font-weight:950;color:var(--accent)}
+body.light .statusMetric .value{color:var(--lightTeamMain,#0c2340)}
+.progressWrap{margin-top:14px;background:var(--field);border:1px solid var(--border);border-radius:999px;overflow:hidden;height:18px}
+.progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease}
+body.light .progressBar{background:linear-gradient(90deg,var(--lightTeamMain,#0c2340),var(--lightTeamComp,#4b92db))}
+.progressMeta{margin-top:8px;color:var(--muted);font-size:13px}
+.appFooter{max-width:1400px;margin:0 auto 34px;padding:0 20px}
+.footerCard{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:22px;padding:18px 20px;box-shadow:0 14px 34px var(--shadow);text-align:center;color:var(--muted)}
+.footerTitle{font-weight:950;color:var(--text);font-size:18px;margin-bottom:8px}
+.footerLine{margin:4px 0}.footerLine strong{color:var(--accent)}body.light .footerLine strong{color:var(--lightTeamMain,#0c2340)}
+
 @media(max-width:850px){.hero{grid-template-columns:1fr}.tab{flex-basis:130px}.big-count{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -40,6 +66,11 @@ main{max-width:1400px;margin:0 auto;padding:24px 20px 56px}.hero{display:grid;gr
 <header>
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
+  <aside class="cornerStatus" aria-label="Dashboard version status">
+    <div class="ver" id="cornerVersion">v14</div>
+    <div class="stampLabel">Last Updated</div>
+    <div class="stamp" id="cornerLastUpdated">June 6, 2026 • 10:35 AM ET</div>
+  </aside>
   <div class="toolbar"><input id="search" class="search" placeholder="Search within selected week: team, city, network, or matchup..."/><select id="networkFilter"><option value="">All networks</option></select><label class="filterToggle"><input id="primeFilter" type="checkbox"/> Primetime / Special</label><button id="printWeek" class="themeToggle secondaryBtn" type="button">🖨️ Print Week</button><button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle light and dark mode">☀️ Light mode</button></div>
 </header>
 <div class="tabs-wrap"><div id="tabs" class="tabs"></div></div>
@@ -48,10 +79,23 @@ main{max-width:1400px;margin:0 auto;padding:24px 20px 56px}.hero{display:grid;gr
     <div class="card nextEvent"><div class="nextLabel">Next NFL Event</div><div id="nextMatch" class="nextMatch">Loading...</div><div id="nextCountdown" class="nextCountdown">--</div><div id="nextMeta" class="nextMeta"></div></div>
     <div class="card"><div class="week-title"><div><h2 id="weekName"></h2><div id="weekRange" class="meta"></div></div><span id="gameCount" class="pill"></span></div><div class="big-count"><div class="count-box"><div id="d" class="num">--</div><div class="lbl">Days</div></div><div class="count-box"><div id="h" class="num">--</div><div class="lbl">Hours</div></div><div class="count-box"><div id="m" class="num">--</div><div class="lbl">Minutes</div></div><div class="count-box"><div id="s" class="num">--</div><div class="lbl">Seconds</div></div></div></div>
   </section>
+  <section class="card statusCard" aria-label="Season progress">
+    <div class="statusHeader"><div><div class="nextLabel">Dashboard Status</div><div class="statusTitle">Season Progress</div></div><span class="pill" id="statusGamesCompleted">0 / 272 games completed</span></div>
+    <div class="progressWrap"><div id="seasonProgressBar" class="progressBar"></div></div>
+    <div id="seasonProgressMeta" class="progressMeta">Season Progress: 0%</div>
+  </section>
   <section class="card teamPanel"><h3 style="margin-top:0"><span id="commandTitleTeam">Steelers</span> Command Center</h3><div class="meta">Select any NFL team to personalize the dashboard, view the next game countdown, scan quick Command Center tabs, and open the full Week 1 through Week 18 schedule only when you need it.</div><div class="commandControls"><label class="lbl" for="commandTeamSelect">Command Center Team</label><select id="commandTeamSelect" aria-label="Choose Command Center team"></select></div><div id="commandHero" class="commandHero"></div><div id="steelersStats" class="commandGrid"></div><nav class="commandSubtabs" aria-label="Command Center quick tabs"><button class="commandSubtab active" data-command-tab="overview">Overview</button><button class="commandSubtab" data-command-tab="primetime">Primetime / Special</button><button class="commandSubtab" data-command-tab="division">Standings</button></nav><section id="commandOverview" class="commandPane active"><div class="meta">Use the quick tabs above for the compact Command Center view. Open the full schedule below only when you want all 18 weeks.</div></section><section id="primeBoard" class="commandPane"></section><section id="divisionBoard" class="divisionBoard commandPane"></section><details id="fullTeamScheduleDetails" class="scheduleDisclosure"><summary><span id="scheduleSummaryTitle">Show Full Team Schedule</span><span class="summaryMeta">Week 1 through Week 18</span></summary><section id="steelersSchedule" class="steelersSchedule"></section></details></section>
   <section class="card teamPanel"><h3 style="margin-top:0">Team Full Season Schedule</h3><div class="meta">Type a team name or city, like <b>Steelers</b>, <b>Pittsburgh</b>, <b>Patriots</b>, or <b>Dallas</b>, to see that team from Week 1 through Week 18.</div><input id="teamSearch" class="search" style="width:100%;margin-top:12px" placeholder="Team Full Season Schedule search..."/><div id="teamHint" class="teamHint"></div><section id="teamResults" class="teamResults"></section></section>
   <section id="games"></section><div id="empty" class="empty">No games match your filter.</div>
 </main>
+<footer class="appFooter" aria-label="Dashboard footer">
+  <div class="footerCard">
+    <div class="footerTitle">2026 NFL Dashboard</div>
+    <div class="footerLine"><strong id="footerVersion">Version 14</strong></div>
+    <div class="footerLine" id="footerLastUpdated">Last Updated: June 6, 2026 • 10:35 AM ET</div>
+    <div class="footerLine">Maintained by Kenny Landry</div>
+  </div>
+</footer>
 <script>
 const weeks = [
 {week:1,start:'2026-09-09T20:20:00-04:00',range:'Sep 9-14, 2026',games:[['New England Patriots at Seattle Seahawks','Wed','8:20p ET','NBC'],['San Francisco 49ers vs Los Angeles Rams (Melbourne)','Thu','8:35p ET','Netflix'],['Chicago Bears at Carolina Panthers','Sun','1:00p ET','FOX'],['Tampa Bay Buccaneers at Cincinnati Bengals','Sun','1:00p ET','FOX'],['New Orleans Saints at Detroit Lions','Sun','1:00p ET','FOX'],['Buffalo Bills at Houston Texans','Sun','1:00p ET','CBS'],['Baltimore Ravens at Indianapolis Colts','Sun','1:00p ET','CBS'],['Cleveland Browns at Jacksonville Jaguars','Sun','1:00p ET','CBS'],['Atlanta Falcons at Pittsburgh Steelers','Sun','1:00p ET','FOX'],['New York Jets at Tennessee Titans','Sun','1:00p ET','CBS'],['Arizona Cardinals at Los Angeles Chargers','Sun','4:25p ET','CBS'],['Miami Dolphins at Las Vegas Raiders','Sun','4:25p ET','FOX'],['Green Bay Packers at Minnesota Vikings','Sun','4:25p ET','CBS'],['Washington Commanders at Philadelphia Eagles','Sun','4:25p ET','FOX'],['Dallas Cowboys at New York Giants','Sun','8:20p ET','NBC'],['Denver Broncos at Kansas City Chiefs','Mon','8:15p ET','ESPN/ABC']]},
@@ -72,6 +116,15 @@ const weeks = [
 {week:16,start:'2026-12-24T20:15:00-05:00',range:'Dec 24-28, 2026',games:[['Houston Texans at Philadelphia Eagles','Thu','8:15p ET','AMZ*'],['Green Bay Packers at Chicago Bears','Fri','1:00p ET','NETFLIX'],['Buffalo Bills at Denver Broncos','Fri','4:30p ET','NETFLIX'],['Los Angeles Rams at Seattle Seahawks','Fri','8:15p ET','FOX'],['TBD game','Sat','4:30p ET','NFLN'],['TBD game','Sat','8:00p ET','NFLN'],['Tampa Bay Buccaneers at Atlanta Falcons','TBD','TBD','TBD'],['Cincinnati Bengals at Indianapolis Colts','TBD','TBD','TBD'],['Washington Commanders at Minnesota Vikings','TBD','TBD','TBD'],['Carolina Panthers at Pittsburgh Steelers','TBD','TBD','TBD'],['Cleveland Browns at Baltimore Ravens','Sun','1:00p ET','CBS'],['Los Angeles Chargers at Miami Dolphins','Sun','1:00p ET','FOX'],['Arizona Cardinals at New Orleans Saints','Sun','1:00p ET','FOX'],['New England Patriots at New York Jets','Sun','1:00p ET','CBS'],['Tennessee Titans at Las Vegas Raiders','Sun','4:05p ET','FOX'],['San Francisco 49ers at Kansas City Chiefs','Sun','4:25p ET','CBS'],['Jacksonville Jaguars at Dallas Cowboys','Sun','8:20p ET','NBC*'],['New York Giants at Detroit Lions','Mon','8:15p ET','ESPN*']]},
 {week:17,start:'2026-12-31T20:15:00-05:00',range:'Dec 31, 2026-Jan 4, 2027',games:[['Baltimore Ravens at Cincinnati Bengals','Thu','8:15p ET','AMZ*'],['TBD game','Sat','4:30p ET','NBC'],['TBD game','Sat','8:00p ET','Peacock'],['Washington Commanders at Jacksonville Jaguars','TBD','TBD','TBD'],['Kansas City Chiefs at Los Angeles Chargers','TBD','TBD','TBD'],['Denver Broncos at New England Patriots','TBD','TBD','TBD'],['Los Angeles Rams at Tampa Bay Buccaneers','TBD','TBD','TBD'],['New Orleans Saints at Atlanta Falcons','Sun','1:00p ET','FOX'],['Seattle Seahawks at Carolina Panthers','Sun','1:00p ET','FOX'],['Indianapolis Colts at Cleveland Browns','Sun','1:00p ET','FOX'],['New York Giants at Dallas Cowboys','Sun','1:00p ET','FOX'],['Buffalo Bills at Miami Dolphins','Sun','1:00p ET','CBS'],['Minnesota Vikings at New York Jets','Sun','1:00p ET','CBS'],['Pittsburgh Steelers at Tennessee Titans','Sun','1:00p ET','CBS'],['Las Vegas Raiders at Arizona Cardinals','Sun','4:05p ET','CBS'],['Detroit Lions at Chicago Bears','Sun','4:25p ET','FOX'],['Philadelphia Eagles at San Francisco 49ers','Sun','8:20p ET','NBC*'],['Houston Texans at Green Bay Packers','Mon','8:15p ET','ESPN*']]},
 {week:18,start:'2027-01-09T13:00:00-05:00',range:'Jan 9-10, 2027',games:[['San Francisco 49ers at Arizona Cardinals','TBD','TBD','TBD'],['Pittsburgh Steelers at Baltimore Ravens','TBD','TBD','TBD'],['New York Jets at Buffalo Bills','TBD','TBD','TBD'],['Atlanta Falcons at Carolina Panthers','TBD','TBD','TBD'],['Cleveland Browns at Cincinnati Bengals','TBD','TBD','TBD'],['Los Angeles Chargers at Denver Broncos','TBD','TBD','TBD'],['Detroit Lions at Green Bay Packers','TBD','TBD','TBD'],['Tennessee Titans at Houston Texans','TBD','TBD','TBD'],['Jacksonville Jaguars at Indianapolis Colts','TBD','TBD','TBD'],['Las Vegas Raiders at Kansas City Chiefs','TBD','TBD','TBD'],['Seattle Seahawks at Los Angeles Rams','TBD','TBD','TBD'],['Chicago Bears at Minnesota Vikings','TBD','TBD','TBD'],['Miami Dolphins at New England Patriots','TBD','TBD','TBD'],['Tampa Bay Buccaneers at New Orleans Saints','TBD','TBD','TBD'],['Philadelphia Eagles at New York Giants','TBD','TBD','TBD'],['Dallas Cowboys at Washington Commanders','TBD','TBD','TBD']]}];
+const dashboardMeta = {
+  version: '14',
+  label: 'Season Launch Edition',
+  updatedThrough: 'Season Launch',
+  currentWeekLabel: 'Preseason',
+  lastUpdated: 'June 6, 2026 • 10:35 AM ET',
+  maintainedBy: 'Kenny Landry',
+  completedGames: 0
+};
 let currentWeek=0;
 const $=id=>document.getElementById(id);
 const fmt=n=>String(n).padStart(2,'0');
@@ -194,6 +247,19 @@ function countdownLong(date){let diff=date-new Date(); if(diff<=0)return 'Starte
 function gameCountdownText(date){let diff=date-new Date(); if(diff<=0)return 'Kickoff / Final'; let s=Math.floor(diff/1000),d=Math.floor(s/86400);s-=d*86400;let h=Math.floor(s/3600);s-=h*3600;let m=Math.floor(s/60);return `${d}d ${h}h ${m}m`;}
 function gameCountdownMarkup(date,label='Kickoff Countdown'){return `<div class="gameCountdown"><span class="label">${label}</span><span class="value" data-game-countdown="${date.toISOString()}">${gameCountdownText(date)}</span></div>`;}
 function refreshGameCountdowns(){document.querySelectorAll('[data-game-countdown]').forEach(el=>{el.textContent=gameCountdownText(new Date(el.dataset.gameCountdown));});}
+function totalScheduledGames(){return weeks.reduce((sum,w)=>sum+w.games.length,0);}
+function renderDashboardStatus(){
+  const total=totalScheduledGames();
+  const done=dashboardMeta.completedGames||0;
+  const pct=total?Math.round((done/total)*100):0;
+  if($('cornerVersion')) $('cornerVersion').textContent=`v${dashboardMeta.version}`;
+  if($('cornerLastUpdated')) $('cornerLastUpdated').textContent=dashboardMeta.lastUpdated;
+  if($('statusGamesCompleted')) $('statusGamesCompleted').textContent=`${done} / ${total} games completed`;
+  if($('seasonProgressBar')) $('seasonProgressBar').style.width=`${pct}%`;
+  if($('seasonProgressMeta')) $('seasonProgressMeta').textContent=`Season Progress: ${pct}% • ${done} of ${total} scheduled games completed`;
+  if($('footerVersion')) $('footerVersion').textContent=`Version ${dashboardMeta.version}`;
+  if($('footerLastUpdated')) $('footerLastUpdated').textContent=`Last Updated: ${dashboardMeta.lastUpdated}`;
+}
 function renderNextEvent(){const n=nextGame(); if(!n){$('nextMatch').textContent='Season started';$('nextCountdown').textContent='';$('nextMeta').textContent='';return;} $('nextMatch').textContent=n.game[0]; $('nextCountdown').textContent=countdownLong(n.date); $('nextMeta').textContent=`Week ${n.week} • ${n.game[1]} ${n.game[2]} • ${n.game[3]} • ${n.range}`;}
 function teamName(key){return (teamAliases[key]&&teamAliases[key][0]?teamAliases[key][0]:key).replace(/\b\w/g,c=>c.toUpperCase()).replace('49Ers','49ers');}
 function teamMatchesGame(key,g){const aliases=teamAliases[key]||[key];const txt=gameText(g);return aliases.some(a=>txt.includes(a));}
@@ -267,7 +333,7 @@ function renderTeamSchedule(){
   hint.textContent=matches.length?`${matches.length} games found for "${q}".`:`No exact team match yet. Try city + nickname, e.g. Pittsburgh Steelers.`;
   root.innerHTML=matches.map(x=>`<article class="teamResult"><div class="wk">Week ${x.week}</div><div class="matchLine">${matchupWithBadges(x.game)}</div>${gameCountdownMarkup(x.date)}<div class="details"><span class="tag">${x.game[1]}</span><span class="tag">${x.game[2]}</span><span class="tag network">${x.game[3]}</span><span class="tag">${x.range}</span></div></article>`).join('');
 }
-function render(){renderTabs();const w=weeks[currentWeek],q=$('search').value.toLowerCase(),net=$('networkFilter').value,primeOnly=$('primeFilter').checked;$('weekName').textContent=`Week ${w.week}`;$('weekRange').textContent=w.range;$('gameCount').textContent=`${w.games.length} games`;const p=weekCountdownParts(w);$('d').textContent=p?p.d:'0';$('h').textContent=p?fmt(p.h):'00';$('m').textContent=p?fmt(p.m):'00';$('s').textContent=p?fmt(p.s):'00';const filtered=w.games.filter(g=>(!q||gameText(g).includes(q))&&(!net||cleanNet(g[3])===net)&&(!primeOnly||isPrimeOrSpecial(g)));if(net){renderNetworkSeason(net,q,primeOnly);}else{renderGames(filtered,w);$('empty').style.display=filtered.length?'none':'block';}renderNextEvent();renderCommandCenter();renderTeamSchedule();}
+function render(){renderTabs();const w=weeks[currentWeek],q=$('search').value.toLowerCase(),net=$('networkFilter').value,primeOnly=$('primeFilter').checked;$('weekName').textContent=`Week ${w.week}`;$('weekRange').textContent=w.range;$('gameCount').textContent=`${w.games.length} games`;const p=weekCountdownParts(w);$('d').textContent=p?p.d:'0';$('h').textContent=p?fmt(p.h):'00';$('m').textContent=p?fmt(p.m):'00';$('s').textContent=p?fmt(p.s):'00';const filtered=w.games.filter(g=>(!q||gameText(g).includes(q))&&(!net||cleanNet(g[3])===net)&&(!primeOnly||isPrimeOrSpecial(g)));if(net){renderNetworkSeason(net,q,primeOnly);}else{renderGames(filtered,w);$('empty').style.display=filtered.length?'none':'block';}renderNextEvent();renderCommandCenter();renderTeamSchedule();renderDashboardStatus();}
 function applyTheme(mode){applyCommandTeamDarkPalette();document.body.classList.toggle('light',mode==='light');$('themeToggle').textContent=mode==='light'?'🌙 Dark mode':'☀️ Light mode';localStorage.setItem('nflDashTheme',mode);}
 setInterval(()=>{document.querySelectorAll('[data-cd]').forEach(el=>el.textContent=weekCountdownText(weeks[+el.dataset.cd]));const p=weekCountdownParts(weeks[currentWeek]);$('d').textContent=p?p.d:'0';$('h').textContent=p?fmt(p.h):'00';$('m').textContent=p?fmt(p.m):'00';$('s').textContent=p?fmt(p.s):'00';renderNextEvent();renderCommandCenter();refreshGameCountdowns();},1000);
 $('search').addEventListener('input',render);$('networkFilter').addEventListener('change',render);$('primeFilter').addEventListener('change',render);$('printWeek').addEventListener('click',()=>window.print());$('teamSearch').addEventListener('input',renderTeamSchedule);$('commandTeamSelect').addEventListener('change',()=>{localStorage.setItem('nflCommandTeam',$('commandTeamSelect').value);applyCommandTeamDarkPalette();render();});$('themeToggle').addEventListener('click',()=>applyTheme(document.body.classList.contains('light')?'dark':'light'));
