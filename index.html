@@ -204,6 +204,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
 .fantasyImpactTrack{overflow:hidden;border-top:1px solid rgba(255,255,255,.10)}
 .fantasyImpactRowLabel{font-size:10px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:#e9d5ff;padding:6px 14px 0}
 .fantasyImpactItems{display:flex;gap:18px;min-width:max-content;padding:7px 14px 9px;animation:fantasyImpactMarquee 120s linear infinite}
+#fantasyImpactItems{animation-duration:60s}
 .fantasyImpactTicker:hover .fantasyImpactItems{animation-play-state:paused}
 .fantasyImpactItem{font-size:13px;font-weight:850;white-space:nowrap}.fantasyImpactItem strong{color:#fde68a}
 @keyframes fantasyImpactMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -215,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v34.4</div>
+    <div class="ver" id="cornerVersion">v34.5</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -444,11 +445,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '34.4',
+  version: '34.5',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • Two-line FF player scoring ticker enabled',
+  lastUpdated: 'October 4, 2026 • Breaking FF ticker sped up and holds latest score',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -1182,9 +1183,10 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       .slice(0,14);
 
     if(impactHistory.length){
-      const breaking=impactHistory.slice(0,10).map(x=>'<span class="fantasyImpactItem">🚨 <strong>'+esc(x.playLabel||x.name)+'</strong> — '+(x.delta>=0?'+':'')+score(x.delta)+' pts • '+score(x.total)+' total • '+esc(x.team)+'</span>');
-      impactItems.innerHTML=breaking.concat(breaking).join('<span class="fantasyImpactItem">•</span>');
-      impactMeta.textContent=impactHistory.length+' recent fantasy scoring update'+(impactHistory.length===1?'':'s');
+      const x=impactHistory[0];
+      const latest='<span class="fantasyImpactItem">🚨 <strong>'+esc(x.playLabel||x.name)+'</strong> — '+(x.delta>=0?'+':'')+score(x.delta)+' pts • '+score(x.total)+' total • '+esc(x.team)+'</span>';
+      impactItems.innerHTML=latest+'<span class="fantasyImpactItem">•</span>'+latest;
+      impactMeta.textContent='Latest fantasy scoring update • holds until a new score arrives';
     }else{
       impactItems.innerHTML='<span class="fantasyImpactItem">Watching for the next rostered-player fantasy scoring change…</span>';
       impactMeta.textContent='Breaking fantasy scoring monitor';
