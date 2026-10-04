@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v34.9</div>
+    <div class="ver" id="cornerVersion">v35</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -286,7 +286,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <div id="liveScoreGrid" class="liveScoreGrid"></div>
 </section>
 
-  <div id="footballTripBanner" class="footballTripBanner">🏈 STADIUM CHASERS UNITE 🏟️ • Annual Football Trip • Week 8</div>
+  <div id="footballTripBanner" class="footballTripBanner">🏈 STADIUM CHASERS UNITE 🏟️ • Annual Football Trip • Week 8 • 🎉 Congrats Roman on FINAL NFL STADIUM Visit!</div>
 <section id="weekScoreboard" class="card weekScoreboard" aria-label="Weekly results scoreboard">
     <div class="weekScoreHead"><div><div class="nextLabel">Weekly Results</div><div id="weekScoreTitle" class="weekScoreTitle">Week Scoreboard</div><div id="weekScoreMeta" class="weekScoreMeta"></div></div><span class="pill">Click a result to jump to game details</span></div>
     <div id="weekScoreGrid" class="weekScoreGrid"></div>
@@ -445,11 +445,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '34.9',
+  version: '35',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • Countdown now uses true Eastern kickoff instant',
+  lastUpdated: 'October 4, 2026 • Roman final NFL stadium tribute added',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -719,7 +719,7 @@ function renderCommandCenter(){
   if($('scheduleSummaryTitle')) $('scheduleSummaryTitle').textContent=`Show ${display} Full Schedule (${games.length} Games)`;
   $('steelersSchedule').innerHTML=games.map(x=>`<article class="teamResult"><div class="wk">${teamPill(key,true)} Week ${x.week}</div><div class="homeAway">${homeAwayFor(key,x.game)}</div><div class="matchLine">${matchupWithBadges(x.game)}</div>${scoreFor(x.game)?finalScoreMarkup(x.game):gameCountdownMarkup(x.date)}<div class="details"><span class="tag">${x.game[1]}</span><span class="tag">${x.game[2]}</span><span class="tag network">${x.game[3]}</span><span class="tag">${x.range}</span>${isPrimeOrSpecial(x.game)?'<span class="tag">Prime/Special</span>':''}</div></article>`).join('');
 }
-function renderTabs(){const tabs=$('tabs');tabs.innerHTML='';weeks.forEach((w,i)=>{const b=document.createElement('button');const p=weekCountdownParts(w);b.className='tab'+(i===currentWeek?' active':'')+(p?'':' past')+(w.week===8?' football-trip':'');b.innerHTML=`<div class="w">Week ${w.week}</div><div class="starts">Starts In</div><div class="cd" data-cd="${i}">${weekCountdownText(w)}</div>`;b.onclick=()=>{currentWeek=i;render();};tabs.appendChild(b);});}
+function renderTabs(){const tabs=$('tabs');tabs.innerHTML='';weeks.forEach((w,i)=>{const b=document.createElement('button');const p=weekCountdownParts(w);b.className='tab'+(i===currentWeek?' active':'')+(p?'':' past')+(w.week===8?' football-trip':'');const tabTitle=w.week===8?'GB - ROMAN\'S FINAL STADIUM':'Week '+w.week;b.innerHTML=`<div class="w">${tabTitle}</div><div class="starts">Starts In</div><div class="cd" data-cd="${i}">${weekCountdownText(w)}</div>`;b.onclick=()=>{currentWeek=i;render();};tabs.appendChild(b);});}
 function renderFilters(){const nets=[...new Set(weeks.flatMap(w=>w.games.map(g=>cleanNet(g[3]))))].filter(Boolean).sort(); $('networkFilter').innerHTML='<option value="">All networks</option>'+nets.map(n=>`<option value="${n}">${displayNet(n)}</option>`).join('');}
 function easternDateKey(date){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const o={};parts.forEach(p=>o[p.type]=p.value);return `${o.year}${o.month}${o.day}`;}
 function normEspnAbbr(a){const m={LA:'LAR',JAC:'JAX',WSH:'WAS'};return m[a]||a;}
