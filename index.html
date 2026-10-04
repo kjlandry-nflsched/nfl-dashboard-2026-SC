@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>2026 NFL Schedule Dashboard - Version 33</title>
+<title>2026 NFL Schedule Dashboard - Version 34</title>
 <style>
 :root{
   --bg:#0b0b0b;--bg2:#171200;--panel:#141414;--panel2:#1f1a07;--text:#fff8e6;--muted:#cdbf95;
@@ -194,6 +194,18 @@ body.dark .game.tripGame{border-color:#fbbf24}
 .liveGameTickerItem strong{color:#f59e0b}
 @keyframes liveGameTickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
+
+/* V34 Fantasy Impact ticker */
+.fantasyImpactWrap{display:none;max-width:1400px;margin:0 auto;padding:0 20px 10px}
+.fantasyImpactWrap.show{display:block}
+.fantasyImpactTicker{border:1px solid #a855f7;background:linear-gradient(135deg,#3b0764,#7e22ce 55%,#111827);color:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(168,85,247,.18)}
+.fantasyImpactTop{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.14)}
+.fantasyImpactTitle{font-weight:950;letter-spacing:.05em;white-space:nowrap}.fantasyImpactMeta{font-size:11px;color:#e9d5ff;white-space:nowrap}
+.fantasyImpactTrack{overflow:hidden}.fantasyImpactItems{display:flex;gap:18px;min-width:max-content;padding:10px 14px;animation:fantasyImpactMarquee 120s linear infinite}
+.fantasyImpactTicker:hover .fantasyImpactItems{animation-play-state:paused}
+.fantasyImpactItem{font-size:13px;font-weight:850;white-space:nowrap}.fantasyImpactItem strong{color:#fde68a}
+@keyframes fantasyImpactMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
 </style>
 </head>
 <body>
@@ -201,7 +213,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v33</div>
+    <div class="ver" id="cornerVersion">v34</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -220,6 +232,17 @@ body.dark .game.tripGame{border-color:#fbbf24}
   </div>
 </div>
 
+
+
+<div id="fantasyImpactWrap" class="fantasyImpactWrap">
+  <div class="fantasyImpactTicker">
+    <div class="fantasyImpactTop">
+      <span>🔥</span><span class="fantasyImpactTitle">FANTASY IMPACT</span>
+      <span id="fantasyImpactMeta" class="fantasyImpactMeta">Waiting for a fantasy scoring impact…</span>
+    </div>
+    <div class="fantasyImpactTrack"><div id="fantasyImpactItems" class="fantasyImpactItems"></div></div>
+  </div>
+</div>
 
 <div id="bigPlayWrap" class="bigPlayWrap">
   <div class="bigPlayTicker">
@@ -412,11 +435,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '33',
-  label: 'Live NFL + Fantasy + Game Tickers Edition',
+  version: '34',
+  label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • Per-game live big-play tickers enabled',
+  lastUpdated: 'October 4, 2026 • Fantasy Impact ticker added',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -933,6 +956,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
         });
       });
       const recent=plays.slice(-10).reverse();
+      window.__recentBigPlays=recent;
       if(!recent.length){
         bigWrap.classList.add('show');
         bigItems.innerHTML='<span class="bigPlayItem">Watching for touchdowns, turnovers and explosive plays…</span>';
@@ -1044,9 +1068,12 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
   const ticker=document.getElementById('fantasyTicker'), tickerItems=document.getElementById('fantasyTickerItems'),
     tickerMeta=document.getElementById('fantasyTickerMeta'), tickerBtn=document.getElementById('fantasyTickerBtn'),
     panel=document.getElementById('fantasyPanel'), grid=document.getElementById('fantasyGrid'),
-    meta=document.getElementById('fantasyMeta'), refresh=document.getElementById('fantasyRefresh');
+    meta=document.getElementById('fantasyMeta'), refresh=document.getElementById('fantasyRefresh'),
+    impactWrap=document.getElementById('fantasyImpactWrap'), impactItems=document.getElementById('fantasyImpactItems'), impactMeta=document.getElementById('fantasyImpactMeta');
   if(!ticker||!panel||!grid) return;
   let timer=null;
+  let previousPlayerPoints={};
+  let impactHistory=[];
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function rec(team){
     const r=team?.record||{};
@@ -1059,6 +1086,55 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
     const proj=side.projected==null?'':'<div class="fantasyProjected">Proj '+score(side.projected)+'</div>';
     return '<div class="fantasyMatchRow">'+img+'<div><div class="fantasyTeamName">'+esc(side.name)+'</div><div class="fantasyRecord">'+esc(rec(side))+'</div></div><div><div class="fantasyScore">'+score(side.score)+'</div>'+proj+'</div></div>';
   }
+  function teamNameById(teams,id){return teams[id]?.name||('Team '+id)}
+  function findRecentBigPlayForPlayer(name){
+    const plays=window.__recentBigPlays||[];
+    const n=String(name||'').toLowerCase();
+    if(!n) return null;
+    const last=n.split(' ').slice(-1)[0];
+    return plays.find(p=>{
+      const t=String(p.text||'').toLowerCase();
+      return t.includes(n) || (last.length>3 && t.includes(last));
+    })||null;
+  }
+  function renderFantasyImpact(players,teams){
+    if(!impactWrap||!impactItems||!impactMeta||!Array.isArray(players)) return;
+    const nowMap={};
+    const fresh=[];
+    players.forEach(p=>{
+      const pts=Number(p.points??p.appliedStatTotal??0);
+      nowMap[p.id]=pts;
+      if(Object.prototype.hasOwnProperty.call(previousPlayerPoints,p.id)){
+        const delta=pts-Number(previousPlayerPoints[p.id]||0);
+        if(delta>=2){
+          const play=findRecentBigPlayForPlayer(p.name);
+          if(play){
+            fresh.push({
+              key:String(p.id)+'|'+String(play.id||play.text),
+              name:p.name||'Player',
+              team:teamNameById(teams,p.teamId),
+              delta,
+              play:play.text||''
+            });
+          }
+        }
+      }
+    });
+    previousPlayerPoints=nowMap;
+    fresh.forEach(x=>{
+      if(!impactHistory.some(h=>h.key===x.key)) impactHistory.unshift(x);
+    });
+    impactHistory=impactHistory.slice(0,12);
+    if(!impactHistory.length){
+      impactWrap.classList.remove('show');
+      return;
+    }
+    const bits=impactHistory.slice(0,8).map(x=>'<span class="fantasyImpactItem">🔥 <strong>'+esc(x.name)+'</strong> • '+esc(x.team)+' • +'+score(x.delta)+' pts • '+esc(x.play)+'</span>');
+    impactItems.innerHTML=bits.concat(bits).join('<span class="fantasyImpactItem">•</span>');
+    impactMeta.textContent=impactHistory.length+' recent fantasy impact'+(impactHistory.length===1?'':'s');
+    impactWrap.classList.add('show');
+  }
+
   async function loadFantasy(){
     try{
       const r=await fetch(ENDPOINT,{cache:'no-store'});
@@ -1067,6 +1143,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       if(!d.ok) throw new Error(d.error||'Fantasy feed unavailable');
       const teams=Object.fromEntries((d.teams||[]).map(t=>[t.id,t]));
       const matchups=d.matchups||[];
+      renderFantasyImpact(d.players||[],teams);
       const items=matchups.map(m=>{
         const a=m.away||{},h=m.home||{};
         return '<span class="fantasyTickItem"><strong>'+esc(a.name)+'</strong> '+score(a.score)+' — <strong>'+esc(h.name)+'</strong> '+score(h.score)+'</span>';
