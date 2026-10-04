@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v34.8</div>
+    <div class="ver" id="cornerVersion">v34.9</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -445,11 +445,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '34.8',
+  version: '34.9',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • Breaking FF ticker fixed to constant visual speed',
+  lastUpdated: 'October 4, 2026 • Countdown now uses true Eastern kickoff instant',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -606,16 +606,9 @@ function gameTimesMarkup(w,g){
 }
 
 function gameDateFromWeek(w,g){
-  const base=new Date(w.start); if(g[1]==='TBD') return base;
-  const dayNums={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
-  const target=dayNums[g[1]];
-  const baseDay=base.getDay();
-  const offset=(target===undefined)?0:(target-baseDay+7)%7;
-  let d=new Date(base); d.setDate(base.getDate()+offset);
-  const raw=(g[2]||'').trim();
-  let m=raw.match(/(\d{1,2}):(\d{2})(a|p)/i);
-  if(m){let hr=parseInt(m[1],10); const ap=m[3].toLowerCase(); if(ap==='p' && hr!==12) hr+=12; if(ap==='a' && hr===12) hr=0; d.setHours(hr,parseInt(m[2],10),0,0);}
-  return d;
+  const exact=easternGameInstant(w,g);
+  if(exact) return exact;
+  return new Date(w.start);
 }
 function weekFirstDate(w){return w.games.map(g=>gameDateFromWeek(w,g)).sort((a,b)=>a-b)[0] || new Date(w.start);}
 function weekCountdownParts(w){return diffParts(weekFirstDate(w).toISOString());}
