@@ -175,9 +175,9 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v31.2</div>
+    <div class="ver" id="cornerVersion">v31.3</div>
     <div class="stampLabel">Last Updated</div>
-    <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game hero lock + Stadium Chasers fantasy</div>
+    <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
   <div class="toolbar"><input id="search" class="search" placeholder="Search within selected week: team, city, network, or matchup..."/><select id="networkFilter"><option value="">All networks</option></select><label class="filterToggle"><input id="primeFilter" type="checkbox"/> Primetime / Special</label><button id="printWeek" class="themeToggle secondaryBtn" type="button">🖨️ Print Week</button><button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle light and dark mode">☀️ Light mode</button></div>
 </header>
@@ -368,11 +368,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '31.2',
+  version: '31.3',
   label: 'Live NFL + Stadium Chasers Fantasy Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • Live game hero state locking enabled',
+  lastUpdated: 'October 4, 2026 • Live game cards synchronized to ESPN',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -661,7 +661,13 @@ async function openBoxScoreForGame(weekNum,gameIdx){const week=weeks.find(w=>w.w
  try{const dateKey=easternDateKey(gameDateFromWeek(week,g));const sb=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${dateKey}`).then(r=>{if(!r.ok)throw new Error('scoreboard');return r.json();});const wanted=teamsInGame(g).map(teamAbbr).map(normEspnAbbr);let event=(sb.events||[]).find(ev=>{const cs=ev.competitions?.[0]?.competitors||[];const abs=cs.map(c=>normEspnAbbr(c.team?.abbreviation));return wanted.every(a=>abs.includes(a));});if(!event)throw new Error('Game not found');const sum=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${event.id}`).then(r=>{if(!r.ok)throw new Error('summary');return r.json();});const comp=sum.header?.competitions?.[0]||event.competitions?.[0];const competitors=(comp?.competitors||[]).slice().sort((a,b)=>(b.homeAway==='away')-(a.homeAway==='away'));const away=competitors.find(c=>c.homeAway==='away')||competitors[0],home=competitors.find(c=>c.homeAway==='home')||competitors[1];const periods=Math.max(linescoreFor(away).length,linescoreFor(home).length,4);const qh=Array.from({length:periods},(_,i)=>`<th>${i<4?'Q'+(i+1):'OT'+(i-3)}</th>`).join('');const quarter=`<table class="quarterTable"><thead><tr><th>Team</th>${qh}<th>T</th></tr></thead><tbody><tr><td>${escapeHtml(away.team?.abbreviation)}</td>${linescoreFor(away).map(v=>`<td>${v}</td>`).join('')}<td><b>${away.score}</b></td></tr><tr><td>${escapeHtml(home.team?.abbreviation)}</td>${linescoreFor(home).map(v=>`<td>${v}</td>`).join('')}<td><b>${home.score}</b></td></tr></tbody></table>`;const bt=sum.boxscore?.teams||[];const awayStats=statMap(bt.find(t=>t.team?.id===away.team?.id)?.statistics),homeStats=statMap(bt.find(t=>t.team?.id===home.team?.id)?.statistics);const statKeys=['totalYards','netPassingYards','rushingYards','firstDowns','thirdDownEff','turnovers','totalPenaltiesYards','possessionTime'];const statLabels={totalYards:'Total Yards',netPassingYards:'Passing Yards',rushingYards:'Rushing Yards',firstDowns:'First Downs',thirdDownEff:'3rd Down',turnovers:'Turnovers',totalPenaltiesYards:'Penalties-Yards',possessionTime:'Time of Possession'};const statsRows=statKeys.map(k=>`<tr><td>${statLabels[k]}</td><td>${escapeHtml(awayStats[k]||'—')}</td><td>${escapeHtml(homeStats[k]||'—')}</td></tr>`).join('');const players=sum.boxscore?.players||[];const aPlayers=players.find(p=>p.team?.id===away.team?.id),hPlayers=players.find(p=>p.team?.id===home.team?.id);body.innerHTML=`<div class="boxScoreHeader"><div><div class="boxTeamName">${escapeHtml(away.team?.displayName)}</div><div class="meta">${escapeHtml(away.records?.[0]?.summary||'')}</div></div><div><div class="boxFinal">Final</div><div class="boxBigScore">${away.score} – ${home.score}</div></div><div><div class="boxTeamName">${escapeHtml(home.team?.displayName)}</div><div class="meta">${escapeHtml(home.records?.[0]?.summary||'')}</div></div></div>${quarter}<div class="boxSection"><h3>Team Comparison</h3><table class="statTable"><thead><tr><th>Stat</th><th>${escapeHtml(away.team?.abbreviation)}</th><th>${escapeHtml(home.team?.abbreviation)}</th></tr></thead><tbody>${statsRows}</tbody></table></div><div class="boxTeamsGrid"><div class="boxTeamPanel"><div class="boxTeamName">${escapeHtml(away.team?.displayName)}</div>${playerCategoryHtml(aPlayers,'passing','Passing')}${playerCategoryHtml(aPlayers,'rushing','Rushing')}${playerCategoryHtml(aPlayers,'receiving','Receiving')}</div><div class="boxTeamPanel"><div class="boxTeamName">${escapeHtml(home.team?.displayName)}</div>${playerCategoryHtml(hPlayers,'passing','Passing')}${playerCategoryHtml(hPlayers,'rushing','Rushing')}${playerCategoryHtml(hPlayers,'receiving','Receiving')}</div></div><div class="boxSource">Detailed statistics load live when the dashboard has internet access. Source: ESPN public game data.</div>`;
  }catch(err){body.innerHTML=`<div class="boxError"><b>Box score data could not be loaded.</b><br><br>The final score is saved in the dashboard, but detailed statistics require an internet connection and access to the live game-data service. Try again while online.</div>`;}}
 function closeBoxScore(){const modal=$('boxScoreModal');modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}
-function renderGameCard(g,w){const selected=($('commandTeamSelect')&&$('commandTeamSelect').value)||'steelers';const featured=teamMatchesGame(selected,g);const dt=gameDateFromWeek(w,g);const result=scoreFor(g);const gameIdx=w.games.indexOf(g);const tripGame=w.week===8&&(g[0]==='Carolina Panthers at Green Bay Packers'||g[0]==='Minnesota Vikings at Detroit Lions');return `<article id="weekGame-${w.week}-${gameIdx}" class="game ${featured?'steelers':''} ${tripGame?'tripGame':''}"><div class="matchLine">${matchupWithBadges(g)}</div>${result?finalScoreMarkup(g):gameCountdownMarkup(dt)}${gameTimesMarkup(w,g)}<div class="details"><span class="tag ${g[1]=='TBD'?'tbd':''}">${g[1]}</span><span class="tag network ${g[3]=='TBD'?'tbd':''}">${g[3]}</span>${result?'<span class="tag winnerTag">FINAL</span>':''}${result?`<button class="boxScoreBtn" type="button" onclick="openBoxScoreForGame(${w.week},${gameIdx})">BOX SCORE ›</button>`:''}</div></article>`;}
+function liveKeyForGame(g){const teams=teamsInGame(g).map(k=>teamAbbr(k)).map(normEspnAbbr).sort();return teams.length===2?teams.join('|'):'';}
+function liveStateForGame(g){const key=liveKeyForGame(g);return key&&window.__liveNFLGames?window.__liveNFLGames[key]||null:null;}
+function liveGameMarkup(live){
+  return `<div class="gameCountdown"><span class="label">LIVE GAME</span><span class="value">${escapeHtml(live.status||'In Progress')}</span></div>
+  <div class="finalScore"><span class="scoreLabel">Live Score</span><span class="scoreValue">${escapeHtml(live.awayScore)} - ${escapeHtml(live.homeScore)}</span></div>`;
+}
+function renderGameCard(g,w){const selected=($('commandTeamSelect')&&$('commandTeamSelect').value)||'steelers';const featured=teamMatchesGame(selected,g);const dt=gameDateFromWeek(w,g);const result=scoreFor(g);const live=liveStateForGame(g);const gameIdx=w.games.indexOf(g);const tripGame=w.week===8&&(g[0]==='Carolina Panthers at Green Bay Packers'||g[0]==='Minnesota Vikings at Detroit Lions');return `<article id="weekGame-${w.week}-${gameIdx}" class="game ${featured?'steelers':''} ${tripGame?'tripGame':''} ${live?'liveNow':''}"><div class="matchLine">${matchupWithBadges(g)}</div>${live?liveGameMarkup(live):(result?finalScoreMarkup(g):gameCountdownMarkup(dt))}${live?'':gameTimesMarkup(w,g)}<div class="details"><span class="tag ${g[1]=='TBD'?'tbd':''}">${g[1]}</span><span class="tag network ${g[3]=='TBD'?'tbd':''}">${g[3]}</span>${live?'<span class="tag winnerTag">LIVE</span>':(result?'<span class="tag winnerTag">FINAL</span>':'')}${result?`<button class="boxScoreBtn" type="button" onclick="openBoxScoreForGame(${w.week},${gameIdx})">BOX SCORE ›</button>`:''}</div></article>`;}
 function renderGames(filtered,w){
   const root=$('games'); root.innerHTML='';
   const groups={}; filtered.forEach(g=>{const label=groupLabel(g); (groups[label] ||= []).push(g);});
@@ -841,6 +847,18 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       const r=await fetch(espnUrl(),{cache:'no-store'});
       if(!r.ok) throw new Error('ESPN returned '+r.status);
       const data=await r.json(),events=Array.isArray(data.events)?data.events:[],live=events.filter(e=>gameState(e)==='in');
+      const liveMap={};
+      live.forEach(e=>{
+        const cc=comp(e),a=team(cc,'away'),h=team(cc,'home');
+        const aAb=normEspnAbbr(a.team?.abbreviation||a.team?.shortDisplayName||'');
+        const hAb=normEspnAbbr(h.team?.abbreviation||h.team?.shortDisplayName||'');
+        const key=[aAb,hAb].filter(Boolean).sort().join('|');
+        if(key) liveMap[key]={
+          awayName:a.team?.displayName||'Away',homeName:h.team?.displayName||'Home',
+          awayScore:a.score??'—',homeScore:h.score??'—',status:detail(e)||'In Progress'
+        };
+      });
+      window.__liveNFLGames=liveMap;
       grid.innerHTML=events.map(renderGame).join('')||'<div class="meta">No NFL games scheduled today.</div>';
       meta.textContent=events.length+' game'+(events.length===1?'':'s')+' today · '+live.length+' live · updated '+new Date().toLocaleTimeString();
 
@@ -860,6 +878,11 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
         window.__liveNFLHero=null;
       }
       if(typeof renderNextEvent==='function') renderNextEvent();
+      if(typeof renderGames==='function' && typeof weeks!=='undefined' && weeks[currentWeek]){
+        const w=weeks[currentWeek],q=$('search').value.toLowerCase(),net=$('networkFilter').value,primeOnly=$('primeFilter').checked;
+        const filtered=w.games.filter(g=>(!q||gameText(g).includes(q))&&(!net||cleanNet(g[3])===net)&&(!primeOnly||isPrimeOrSpecial(g)));
+        if(!net) renderGames(filtered,w);
+      }
 
       if(live.length){
         nav.classList.add('show');
