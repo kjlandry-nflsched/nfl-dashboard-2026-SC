@@ -175,9 +175,9 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v31</div>
+    <div class="ver" id="cornerVersion">v31.1</div>
     <div class="stampLabel">Last Updated</div>
-    <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live NFL + Stadium Chasers fantasy</div>
+    <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live NFL hero sync + Stadium Chasers fantasy</div>
   </aside>
   <div class="toolbar"><input id="search" class="search" placeholder="Search within selected week: team, city, network, or matchup..."/><select id="networkFilter"><option value="">All networks</option></select><label class="filterToggle"><input id="primeFilter" type="checkbox"/> Primetime / Special</label><button id="printWeek" class="themeToggle secondaryBtn" type="button">🖨️ Print Week</button><button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle light and dark mode">☀️ Light mode</button></div>
 </header>
@@ -368,11 +368,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '31',
+  version: '31.1',
   label: 'Live NFL + Stadium Chasers Fantasy Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • Live NFL and Stadium Chasers fantasy feeds enabled',
+  lastUpdated: 'October 4, 2026 • Live NFL hero synchronization enabled',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -833,6 +833,28 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       const data=await r.json(),events=Array.isArray(data.events)?data.events:[],live=events.filter(e=>gameState(e)==='in');
       grid.innerHTML=events.map(renderGame).join('')||'<div class="meta">No NFL games scheduled today.</div>';
       meta.textContent=events.length+' game'+(events.length===1?'':'s')+' today · '+live.length+' live · updated '+new Date().toLocaleTimeString();
+
+      // Keep the main Week hero synchronized with the live ESPN feed.
+      if(live.length){
+        const e=live[0], c=comp(e), away=team(c,'away'), home=team(c,'home');
+        const awayName=away.team?.displayName||'Away', homeName=home.team?.displayName||'Home';
+        const awayScore=away.score??'—', homeScore=home.score??'—';
+        const status=detail(e)||'In Progress';
+        const networks=(c.broadcasts?.[0]?.names||[]).join(' / ');
+        const heroLabel=document.getElementById('nextEventLabel');
+        const heroMatch=document.getElementById('nextMatch');
+        const heroCountdown=document.getElementById('nextCountdown');
+        const heroTimes=document.getElementById('nextTimes');
+        const heroMeta=document.getElementById('nextMeta');
+        if(heroLabel) heroLabel.textContent='NFL GAME IN PROGRESS';
+        if(heroMatch) heroMatch.textContent=awayName+' '+awayScore+' — '+homeScore+' '+homeName;
+        if(heroCountdown) heroCountdown.textContent=status;
+        if(heroTimes) heroTimes.innerHTML='<div class="gameTimes" aria-label="Live game status"><div class="gameTimeZone"><div class="tzLabel">STATUS</div><div class="tzValue">LIVE</div></div><div class="gameTimeZone"><div class="tzLabel">AWAY</div><div class="tzValue">'+esc(awayScore)+'</div></div><div class="gameTimeZone"><div class="tzLabel">HOME</div><div class="tzValue">'+esc(homeScore)+'</div></div></div>';
+        if(heroMeta) heroMeta.textContent=(networks||'NFL')+(c.venue?.fullName?' • '+c.venue.fullName:'');
+      } else if(typeof renderNextEvent==='function'){
+        renderNextEvent();
+      }
+
       if(live.length){
         nav.classList.add('show');
         btnText.textContent='LIVE SCOREBOARD · '+live.length+' GAME'+(live.length===1?'':'S')+' IN PROGRESS';
