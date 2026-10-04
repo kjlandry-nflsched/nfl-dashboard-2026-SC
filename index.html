@@ -201,7 +201,9 @@ body.dark .game.tripGame{border-color:#fbbf24}
 .fantasyImpactTicker{border:1px solid #a855f7;background:linear-gradient(135deg,#3b0764,#7e22ce 55%,#111827);color:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(168,85,247,.18)}
 .fantasyImpactTop{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.14)}
 .fantasyImpactTitle{font-weight:950;letter-spacing:.05em;white-space:nowrap}.fantasyImpactMeta{font-size:11px;color:#e9d5ff;white-space:nowrap}
-.fantasyImpactTrack{overflow:hidden}.fantasyImpactItems{display:flex;gap:18px;min-width:max-content;padding:10px 14px;animation:fantasyImpactMarquee 120s linear infinite}
+.fantasyImpactTrack{overflow:hidden;border-top:1px solid rgba(255,255,255,.10)}
+.fantasyImpactRowLabel{font-size:10px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:#e9d5ff;padding:6px 14px 0}
+.fantasyImpactItems{display:flex;gap:18px;min-width:max-content;padding:7px 14px 9px;animation:fantasyImpactMarquee 120s linear infinite}
 .fantasyImpactTicker:hover .fantasyImpactItems{animation-play-state:paused}
 .fantasyImpactItem{font-size:13px;font-weight:850;white-space:nowrap}.fantasyImpactItem strong{color:#fde68a}
 @keyframes fantasyImpactMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -213,7 +215,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v34.3</div>
+    <div class="ver" id="cornerVersion">v34.4</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -240,7 +242,14 @@ body.dark .game.tripGame{border-color:#fbbf24}
       <span>🔥</span><span class="fantasyImpactTitle">FF PLAYER LIVE</span>
       <span id="fantasyImpactMeta" class="fantasyImpactMeta">Waiting for a fantasy scoring impact…</span>
     </div>
-    <div class="fantasyImpactTrack"><div id="fantasyImpactItems" class="fantasyImpactItems"></div></div>
+    <div class="fantasyImpactTrack">
+      <div class="fantasyImpactRowLabel">Breaking FF Scoring</div>
+      <div id="fantasyImpactItems" class="fantasyImpactItems"></div>
+    </div>
+    <div class="fantasyImpactTrack">
+      <div class="fantasyImpactRowLabel">Live Player Scores</div>
+      <div id="fantasyImpactScores" class="fantasyImpactItems"></div>
+    </div>
   </div>
 </div>
 
@@ -435,11 +444,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '34.3',
+  version: '34.4',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • FF Player Live now tracks individual fantasy point plays',
+  lastUpdated: 'October 4, 2026 • Two-line FF player scoring ticker enabled',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -1085,7 +1094,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
     tickerMeta=document.getElementById('fantasyTickerMeta'), tickerBtn=document.getElementById('fantasyTickerBtn'),
     panel=document.getElementById('fantasyPanel'), grid=document.getElementById('fantasyGrid'),
     meta=document.getElementById('fantasyMeta'), refresh=document.getElementById('fantasyRefresh'),
-    impactWrap=document.getElementById('fantasyImpactWrap'), impactItems=document.getElementById('fantasyImpactItems'), impactMeta=document.getElementById('fantasyImpactMeta');
+    impactWrap=document.getElementById('fantasyImpactWrap'), impactItems=document.getElementById('fantasyImpactItems'), impactScores=document.getElementById('fantasyImpactScores'), impactMeta=document.getElementById('fantasyImpactMeta');
   if(!ticker||!panel||!grid) return;
   let timer=null;
   let previousPlayerPoints={};
@@ -1145,16 +1154,15 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
         const delta=pts-Number(previousPlayerPoints[p.id]||0);
         if(Math.abs(delta)>=0.05){
           const play=findRecentPlayForPlayer(p.name);
-          if(play){
-            fresh.push({
-              key:String(p.id)+'|'+String(play.id||play.text),
-              name:p.name||'Player',
-              team:teamNameById(teams,p.teamId),
-              delta,
-              play:play.text||'',
-              playLabel:compactPlayerPlay(p.name,play)
-            });
-          }
+          fresh.push({
+            key:String(p.id)+'|'+String(pts)+'|'+String(play?.id||play?.text||'score'),
+            name:p.name||'Player',
+            team:teamNameById(teams,p.teamId),
+            delta,
+            total:pts,
+            play:play?.text||'',
+            playLabel:play?compactPlayerPlay(p.name,play):((p.name||'Player')+' • fantasy score update')
+          });
         }
       }
     });
@@ -1163,30 +1171,33 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       if(!impactHistory.some(h=>h.key===x.key)) impactHistory.unshift(x);
     });
     impactHistory=impactHistory.slice(0,12);
-    if(!impactHistory.length){
-      const active=players
-        .map(p=>({
-          name:p.name||'Player',
-          team:teamNameById(teams,p.teamId),
-          pts:Number(p.points??p.appliedStatTotal??0)
-        }))
-        .filter(p=>p.pts>0)
-        .sort((a,b)=>b.pts-a.pts)
-        .slice(0,12);
-      if(active.length){
-        const bits=active.map(p=>'<span class="fantasyImpactItem">🏈 <strong>'+esc(p.name)+'</strong> • '+esc(p.team)+' • '+score(p.pts)+' pts</span>');
-        impactItems.innerHTML=bits.concat(bits).join('<span class="fantasyImpactItem">•</span>');
-        impactMeta.textContent='Live fantasy player scoring';
-      }else{
-        impactItems.innerHTML='<span class="fantasyImpactItem">Watching rostered fantasy players for live scoring changes…</span>';
-        impactMeta.textContent='Live fantasy player monitor';
-      }
-      impactWrap.classList.add('show');
-      return;
+    const active=players
+      .map(p=>({
+        name:p.name||'Player',
+        team:teamNameById(teams,p.teamId),
+        pts:Number(p.points??p.appliedStatTotal??0)
+      }))
+      .filter(p=>p.pts>0)
+      .sort((a,b)=>b.pts-a.pts)
+      .slice(0,14);
+
+    if(impactHistory.length){
+      const breaking=impactHistory.slice(0,10).map(x=>'<span class="fantasyImpactItem">🚨 <strong>'+esc(x.playLabel||x.name)+'</strong> — '+(x.delta>=0?'+':'')+score(x.delta)+' pts • '+score(x.total)+' total • '+esc(x.team)+'</span>');
+      impactItems.innerHTML=breaking.concat(breaking).join('<span class="fantasyImpactItem">•</span>');
+      impactMeta.textContent=impactHistory.length+' recent fantasy scoring update'+(impactHistory.length===1?'':'s');
+    }else{
+      impactItems.innerHTML='<span class="fantasyImpactItem">Watching for the next rostered-player fantasy scoring change…</span>';
+      impactMeta.textContent='Breaking fantasy scoring monitor';
     }
-    const bits=impactHistory.slice(0,10).map(x=>'<span class="fantasyImpactItem">🏈 <strong>'+esc(x.playLabel||x.name)+'</strong> — '+(x.delta>=0?'+':'')+score(x.delta)+' pts • '+esc(x.team)+'</span>');
-    impactItems.innerHTML=bits.concat(bits).join('<span class="fantasyImpactItem">•</span>');
-    impactMeta.textContent=impactHistory.length+' recent fantasy impact'+(impactHistory.length===1?'':'s');
+
+    if(impactScores){
+      if(active.length){
+        const totals=active.map(p=>'<span class="fantasyImpactItem">🏈 <strong>'+esc(p.name)+'</strong> • '+score(p.pts)+' pts • '+esc(p.team)+'</span>');
+        impactScores.innerHTML=totals.concat(totals).join('<span class="fantasyImpactItem">•</span>');
+      }else{
+        impactScores.innerHTML='<span class="fantasyImpactItem">No rostered players have scored yet.</span>';
+      }
+    }
     impactWrap.classList.add('show');
   }
 
