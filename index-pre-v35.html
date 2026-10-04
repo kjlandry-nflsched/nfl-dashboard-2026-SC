@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>2026 NFL Schedule Dashboard - Version 34</title>
+<style>
+:root{
+  --bg:#0b0b0b;--bg2:#171200;--panel:#141414;--panel2:#1f1a07;--text:#fff8e6;--muted:#cdbf95;
+  --accent:#ffb612;--accent2:#f5d06f;--border:#4a3a05;--danger:#ff6b6b;--shadow:rgba(0,0,0,.35);
+  --field:#0f0f0f;--tab:#1b1b1b;--game:#101010;--stripe:#ffb612;--activeText:#111;
+}
+body.light{
+  --bg:#ffffff;--bg2:#f3f5f8;--panel:#ffffff;--panel2:#f6f8fb;--text:#17212b;--muted:#5b6775;
+  --accent:var(--lightTeamMain,#0c2340);--accent2:var(--lightTeamComp,#4b92db);--border:var(--lightBorder,#b9c7d6);--danger:#b42318;--shadow:rgba(18,28,39,.13);
+  --field:#ffffff;--tab:#eef2f6;--game:#ffffff;--stripe:var(--lightTeamMain,#0c2340);--activeText:var(--lightActiveText,#ffffff);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 18% 0%,var(--bg2) 0,var(--bg) 42%,#050505 100%);color:var(--text);transition:background .2s,color .2s;border-top:10px solid var(--accent)}
+body.light{background:linear-gradient(180deg,#ffffff 0%,#f3f5f8 100%)}
+header{padding:26px 20px 16px;max-width:1400px;margin:0 auto;position:relative}
+h1{margin:0;font-size:clamp(28px,4vw,50px);letter-spacing:-.04em}.gold{color:var(--accent);text-shadow:0 2px 0 rgba(0,0,0,.20)}body.light .gold{color:var(--lightTeamMain,#0c2340);text-shadow:none}
+.sub{color:var(--muted);margin-top:8px;font-size:15px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.search{flex:1;min-width:240px}
+input,select,button{font:inherit}input,select{background:var(--field);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:12px 14px;font-size:14px}.themeToggle{border:1px solid var(--border);background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--activeText);border-radius:14px;padding:12px 14px;font-weight:900;cursor:pointer}.themeToggle:hover{filter:brightness(1.05)}
+.tabs-wrap{position:sticky;top:0;z-index:20;background:rgba(9,9,9,.92);backdrop-filter:blur(12px);border-top:1px solid rgba(255,182,18,.22);border-bottom:1px solid rgba(255,182,18,.28)}body.light .tabs-wrap{background:rgba(255,255,255,.94);border-top-color:#d9e4ef;border-bottom-color:#d9e4ef}
+.tabs{max-width:1400px;margin:0 auto;display:flex;gap:10px;overflow-x:auto;padding:14px 20px}.tab{flex:0 0 145px;border:1px solid var(--border);background:linear-gradient(180deg,var(--tab),var(--panel));color:var(--text);border-radius:16px;padding:11px 10px;text-align:left;cursor:pointer;transition:.18s;box-shadow:0 8px 18px var(--shadow);position:relative;overflow:hidden}.tab:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}.tab:hover{transform:translateY(-1px);border-color:var(--accent)}.tab.active{border-color:var(--accent);background:linear-gradient(180deg,var(--accent),#171200);color:#111;box-shadow:0 0 0 3px rgba(255,182,18,.45),0 12px 28px var(--shadow)}body.light .tab{color:#17212b}body.light .tab.active{background:linear-gradient(180deg,var(--lightTeamMain,#0c2340),var(--lightTeamMain2,#164978));color:var(--lightActiveText,#ffffff);box-shadow:0 0 0 3px var(--lightGlow,rgba(75,146,219,.30)),0 12px 28px var(--shadow)}.tab .w{font-weight:900}.tab .starts{font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-top:4px;opacity:.8}.tab .cd{font-size:12px;color:var(--accent2);margin-top:2px;line-height:1.2;font-weight:800}.tab.active .cd{color:inherit}.tab.past .cd{color:var(--muted)}
+main{max-width:1400px;margin:0 auto;padding:24px 20px 56px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-bottom:18px}.card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:24px;padding:20px;box-shadow:0 20px 50px var(--shadow)}.week-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.week-title h2{margin:0;font-size:32px;letter-spacing:-.03em}.big-count{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.count-box{background:var(--field);border:1px solid var(--border);border-radius:18px;padding:14px;text-align:center}.num{font-size:30px;font-weight:900;color:var(--accent)}body.light .num{color:var(--lightTeamMain,#0c2340)}.lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.meta{color:var(--muted);font-size:14px;line-height:1.5}.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--field);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:12px;margin:3px}
+.nextEvent{border-left:7px solid var(--accent)}.nextLabel{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900}.nextMatch{font-size:clamp(24px,3vw,38px);font-weight:950;letter-spacing:-.04em;margin-top:6px}.nextCountdown{font-size:22px;color:var(--accent2);font-weight:950;margin-top:10px}.nextMeta{margin-top:8px;color:var(--muted)}
+.group{margin:18px 0 28px}.groupHeader{display:flex;align-items:center;gap:12px;margin:0 0 12px}.groupHeader:after{content:"";height:2px;background:linear-gradient(90deg,var(--accent),transparent);flex:1}.groupTitle{margin:0;font-size:20px;font-weight:950;letter-spacing:-.02em}.groupMeta{color:var(--muted);font-size:12px}.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}.game{background:var(--game);border:1px solid var(--border);border-left:6px solid var(--accent);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 20px var(--shadow)}.game.steelers{box-shadow:0 0 0 2px rgba(255,182,18,.35),0 14px 28px var(--shadow)}body.light .game.steelers{box-shadow:0 0 0 2px var(--lightGlow,rgba(75,146,219,.30)),0 14px 28px var(--shadow)}.match{font-size:17px;font-weight:900;line-height:1.25}.details{display:flex;gap:8px;flex-wrap:wrap}.gameCountdown{margin-top:2px;border:1px solid var(--border);background:linear-gradient(135deg,var(--field),var(--panel2));border-radius:14px;padding:9px 10px;font-weight:950;color:var(--accent2);display:flex;justify-content:space-between;gap:10px;align-items:center}.gameCountdown .label{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.gameTimes{margin-top:2px;border:1px solid var(--border);background:linear-gradient(135deg,var(--field),var(--panel2));border-radius:14px;padding:10px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.gameTimeZone{min-width:0;text-align:center;border-right:1px solid var(--border);padding:2px 6px}.gameTimeZone:last-child{border-right:0}
+.gameTimeZone .tzLabel{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900;white-space:nowrap}
+.gameTimeZone .tzValue{font-size:13px;font-weight:950;color:var(--accent2);margin-top:3px;line-height:1.15}
+body.light .gameTimeZone .tzValue{color:var(--lightTeamMain,#0c2340)}
+@media(max-width:720px){.gameTimes{grid-template-columns:repeat(2,1fr)}.gameTimeZone{border-right:0;border-bottom:1px solid var(--border);padding:6px}.gameTimeZone:last-child{border-bottom:0}.gameTimeZone:nth-last-child(2){border-bottom:0}}
+.finalScore{margin-top:2px;border:1px solid var(--border);background:linear-gradient(135deg,var(--field),var(--panel2));border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}.finalScore .scoreLabel{font-size:10px;text-transform:uppercase;letter-spacing:.10em;color:var(--muted);font-weight:900}.finalScore .scoreValue{font-size:20px;font-weight:950;color:var(--accent2)}.winnerTag{border-color:var(--accent);font-weight:950}body.light .finalScore .scoreValue{color:var(--lightTeamMain,#0c2340)}body.light .gameCountdown{color:var(--lightTeamMain,#0c2340)}body.light .commandTeamName,body.light .commandHeroTitle,body.light .statValue,body.light .teamResult .wk,body.light .nextMatch,body.light .network{color:var(--lightTeamMain,#0c2340)}body.light .teamResult,body.light .divisionChip,body.light .primeItem,body.light .game{border-left-color:var(--lightTeamMain,#4b92db)}.tag{border:1px solid var(--border);background:var(--field);border-radius:999px;padding:5px 8px;color:var(--text);font-size:12px}.network{color:var(--accent2);font-weight:800}.tbd{color:var(--danger);border-color:rgba(251,113,133,.45)}.empty{display:none;text-align:center;color:var(--muted);padding:30px}.note{font-size:12px;color:var(--muted);margin-top:14px}.teamPanel{margin-bottom:18px}.teamResults{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px;margin-top:14px}.teamResult{background:var(--game);border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:18px;padding:14px}.teamResult .wk{font-weight:950;color:var(--accent);margin-bottom:4px}.teamHint{font-size:13px;color:var(--muted);margin-top:8px}
+.commandGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}.statBox{background:var(--field);border:1px solid var(--border);border-radius:18px;padding:16px}.statValue{font-size:24px;font-weight:950;color:var(--accent)}.steelersSchedule{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}.commandControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}.commandControls select{min-width:280px}.commandTeamName{color:var(--accent);font-weight:950}
+
+.filterToggle{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:14px;padding:11px 13px;font-size:14px;font-weight:800;white-space:nowrap}.filterToggle input{accent-color:var(--accent)}.secondaryBtn{background:var(--field);color:var(--text)}
+.commandHero{margin-top:16px;border:1px solid var(--border);border-left:8px solid var(--accent);border-radius:22px;padding:18px;background:linear-gradient(135deg,var(--field),var(--panel2));display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}.teamBadge{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--activeText);font-weight:950;font-size:22px;box-shadow:0 10px 24px var(--shadow)}.teamPills{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.teamPill{display:inline-flex;align-items:center;justify-content:center;min-width:46px;height:30px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:950;letter-spacing:.04em;border:1px solid rgba(255,255,255,.22);box-shadow:0 6px 14px rgba(0,0,0,.18);color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35)}body.light .teamPill{box-shadow:0 4px 10px rgba(12,35,64,.16);border-color:rgba(12,35,64,.18)}.matchLine{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.teamPillMini{min-width:38px;height:24px;font-size:11px;padding:0 8px}.primeStrip{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}.primeItem{background:var(--game);border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:16px;padding:12px}.homeAway{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}.commandHeroTitle{font-size:26px;font-weight:950;letter-spacing:-.03em}.commandHeroMeta{color:var(--muted);font-size:13px;margin-top:4px}.commandHeroCountdown{text-align:right}.commandHeroCountdown .value{font-size:24px;font-weight:950;color:var(--accent2)}.divisionBoard{margin-top:14px;background:var(--field);border:1px solid var(--border);border-radius:18px;padding:16px}.divisionTeams{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.divisionChip{border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:999px;padding:8px 11px;background:var(--game);font-weight:850}.printNote{display:none}
+.commandSubtabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 12px}.commandSubtab{border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:999px;padding:10px 13px;font-weight:900;cursor:pointer}.commandSubtab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--activeText);border-color:var(--accent)}body.light .commandSubtab.active{background:linear-gradient(135deg,var(--lightTeamMain,#0c2340),var(--lightTeamMain2,#164978));color:var(--lightActiveText,#fff)}.commandPane{display:none;margin-top:12px}.commandPane.active{display:block}.scheduleDisclosure{margin-top:16px;border:1px solid var(--border);border-radius:20px;background:linear-gradient(180deg,var(--field),var(--panel2));overflow:hidden}.scheduleDisclosure summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;font-weight:950;color:var(--text);border-left:6px solid var(--accent)}.scheduleDisclosure summary::-webkit-details-marker{display:none}.scheduleDisclosure summary:before{content:'+';display:inline-grid;place-items:center;width:26px;height:26px;border-radius:999px;background:var(--accent);color:var(--activeText);margin-right:10px;flex:0 0 26px}.scheduleDisclosure[open] summary:before{content:'–'}.scheduleDisclosure summary span:first-child{margin-right:auto}.summaryMeta{font-size:12px;color:var(--muted);font-weight:800}.scheduleDisclosure .steelersSchedule{padding:0 14px 16px}body.light .scheduleDisclosure summary{border-left-color:var(--lightTeamMain,#0c2340)}body.light .scheduleDisclosure summary:before{background:var(--lightTeamMain,#0c2340);color:var(--lightActiveText,#fff)}
+
+/* V25 navigation: feature tabs + current week + compact completed weeks */
+.tabs-wrap{overflow:visible}
+.navShell{max-width:1400px;margin:0 auto}
+.tabs{max-width:none;margin:0;overflow-x:auto;padding-bottom:10px}
+.completedTabsBar{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:0 20px 10px;border-top:1px solid rgba(255,255,255,.06)}
+body.light .completedTabsBar{border-top-color:#d9e4ef}
+.completedTabsLabel{flex:0 0 auto;font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:950;padding-right:4px}
+.tab.completedMini{flex:0 0 auto;min-width:78px;padding:6px 10px;border-radius:11px;box-shadow:none;opacity:.72;text-align:center}
+.tab.completedMini:before{width:3px}
+.tab.completedMini .w{font-size:12px}
+.tab.completedMini .starts,.tab.completedMini .cd{display:none}
+.tab.completedMini:hover{opacity:1}
+.tab.currentWeekTab{box-shadow:0 0 0 2px var(--accent),0 10px 24px var(--shadow)}
+.tab.currentWeekTab .starts{color:var(--accent2);font-weight:950}
+.tab.currentWeekTab .starts::before{content:'● ';}
+
+/* Week 8 / Stadium Chasers gets its own ticket-style treatment */
+.tab.football-trip{flex-basis:205px!important;border:2px dashed #facc15!important;background:linear-gradient(135deg,#052e16 0%,#14532d 38%,#1d4ed8 100%)!important;color:#fff!important;box-shadow:0 0 0 3px rgba(250,204,21,.18),0 10px 26px rgba(0,0,0,.28)!important;transform:rotate(-.25deg);}
+.tab.football-trip:before{width:8px;background:linear-gradient(180deg,#facc15,#f59e0b)}
+.tab.football-trip .w{font-size:14px;letter-spacing:.01em}
+.tab.football-trip .w::after{content:''!important}
+.tab.football-trip .starts{font-size:10px;color:#fde68a!important;opacity:1}
+.tab.football-trip .cd{color:#dbeafe!important;font-size:11px}
+.tab.football-trip:hover{transform:translateY(-2px) rotate(-.25deg);filter:brightness(1.08)}
+.tab.football-trip.active{box-shadow:0 0 0 3px #facc15,0 14px 34px rgba(29,78,216,.35)!important}
+body.light .tab.football-trip{color:#fff!important}
+@media(max-width:850px){.tab.football-trip{flex-basis:175px!important}.completedTabsBar{padding-left:12px;padding-right:12px}}
+
+
+/* V28 interactive box scores */
+.boxScoreBtn{border:1px solid var(--accent);background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--activeText);font-weight:950;border-radius:999px;padding:7px 11px;cursor:pointer}.boxScoreBtn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.boxScoreModal{position:fixed;inset:0;background:rgba(2,6,23,.82);backdrop-filter:blur(8px);z-index:999;display:none;padding:18px;overflow:auto}.boxScoreModal.open{display:block}.boxScoreDialog{max-width:1180px;margin:20px auto;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden}.boxScoreTop{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);z-index:2}.boxScoreTitle{font-size:22px;font-weight:950}.boxScoreClose{border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:12px;padding:9px 12px;font-weight:900;cursor:pointer}.boxScoreBody{padding:18px}.boxScoreHeader{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;text-align:center}.boxTeamName{font-weight:950;font-size:19px}.boxBigScore{font-size:44px;font-weight:950}.boxFinal{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900}.quarterTable,.statTable,.playerTable{width:100%;border-collapse:collapse;margin-top:14px}.quarterTable th,.quarterTable td,.statTable th,.statTable td,.playerTable th,.playerTable td{padding:8px 9px;border-bottom:1px solid var(--border);text-align:right;font-size:13px}.quarterTable th:first-child,.quarterTable td:first-child,.statTable th:first-child,.statTable td:first-child,.playerTable th:first-child,.playerTable td:first-child{text-align:left}.boxSection{margin-top:20px}.boxSection h3{margin:0 0 8px;font-size:17px}.boxTeamsGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.boxTeamPanel{background:var(--field);border:1px solid var(--border);border-radius:18px;padding:14px;overflow:auto}.boxSource{margin-top:16px;font-size:12px;color:var(--muted)}.boxError{padding:22px;border:1px dashed var(--border);border-radius:16px;color:var(--muted)}@media(max-width:760px){.boxScoreHeader{grid-template-columns:1fr}.boxTeamsGrid{grid-template-columns:1fr}.boxBigScore{font-size:34px}}
+@media print{body{background:#fff!important;color:#000!important;border-top:0}.tabs-wrap,.toolbar,.teamPanel:nth-of-type(2),#teamResults,#teamHint{display:none!important}header,main{max-width:none;padding:10px}.hero{grid-template-columns:1fr}.card,.game,.teamResult,.statBox{box-shadow:none!important;border-color:#999!important;background:#fff!important;color:#000!important}.groupHeader:after{background:#999}.network,.statValue,.num,.wk{color:#000!important}.printNote{display:block;color:#000;margin:8px 0}.games{grid-template-columns:repeat(2,1fr)}}
+
+
+.cornerStatus{position:absolute;right:20px;top:20px;min-width:190px;max-width:240px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-right:6px solid var(--accent);border-radius:18px;padding:12px 14px;box-shadow:0 12px 30px var(--shadow);text-align:right}
+.cornerStatus .ver{font-size:26px;font-weight:950;letter-spacing:-.04em;color:var(--accent);line-height:1}
+.cornerStatus .stampLabel{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-top:8px}
+.cornerStatus .stamp{font-size:12px;color:var(--text);font-weight:800;line-height:1.25;margin-top:3px}
+body.light .cornerStatus{border-right-color:var(--lightTeamMain,#0c2340)}
+body.light .cornerStatus .ver{color:var(--lightTeamMain,#0c2340)}
+@media(max-width:900px){.cornerStatus{position:static;margin-top:14px;text-align:left;max-width:none;border-right:1px solid var(--border);border-left:6px solid var(--accent)}body.light .cornerStatus{border-left-color:var(--lightTeamMain,#0c2340)}}
+
+.statusCard{margin-bottom:18px;border-left:7px solid var(--accent)}
+.statusHeader{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.statusTitle{font-size:20px;font-weight:950;letter-spacing:-.02em}
+.statusGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.statusMetric{background:var(--field);border:1px solid var(--border);border-radius:16px;padding:13px}
+.statusMetric .value{font-size:20px;font-weight:950;color:var(--accent)}
+body.light .statusMetric .value{color:var(--lightTeamMain,#0c2340)}
+.progressWrap{margin-top:14px;background:var(--field);border:1px solid var(--border);border-radius:999px;overflow:hidden;height:18px}
+.progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease}
+body.light .progressBar{background:linear-gradient(90deg,var(--lightTeamMain,#0c2340),var(--lightTeamComp,#4b92db))}
+.progressMeta{margin-top:8px;color:var(--muted);font-size:13px}
+.appFooter{max-width:1400px;margin:0 auto 34px;padding:0 20px}
+.footerCard{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:22px;padding:18px 20px;box-shadow:0 14px 34px var(--shadow);text-align:center;color:var(--muted)}
+.footerTitle{font-weight:950;color:var(--text);font-size:18px;margin-bottom:8px}
+.footerLine{margin:4px 0}.footerLine strong{color:var(--accent)}body.light .footerLine strong{color:var(--lightTeamMain,#0c2340)}
+
+@media(max-width:850px){.hero{grid-template-columns:1fr}.tab{flex-basis:130px}.big-count{grid-template-columns:repeat(2,1fr)}}
+
+
+/* V15 Stadium Attendance Center */
+.stadiumTabButton{flex-basis:185px;background:linear-gradient(135deg,#004c92,#00316b 52%,#001a3f)!important;color:#fff!important;border-color:#3aa7ff!important}.stadiumTabButton:before{background:#37d67a}.stadiumTabButton.active{background:linear-gradient(135deg,#16a34a,#0ea5e9)!important;color:#fff!important}.tab .newBadge{position:absolute;right:8px;top:6px;background:#ef4444;color:#fff;border-radius:999px;font-size:9px;padding:2px 6px;font-weight:950}
+#stadiumAttendancePanel{display:none}.stadiumShell{position:relative;overflow:hidden;background:radial-gradient(circle at 10% 8%,rgba(56,189,248,.26),transparent 30%),radial-gradient(circle at 88% 4%,rgba(34,197,94,.20),transparent 28%),linear-gradient(135deg,#061a3a,#08245b 42%,#020617);border-color:#1d9bf0;color:#fff}.stadiumShell:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:32px 32px;opacity:.32;pointer-events:none}.stadiumContent{position:relative;z-index:1}.stadiumHero{display:grid;grid-template-columns:230px 1fr;gap:20px;align-items:stretch}.stadiumIntro{border:1px solid rgba(96,165,250,.52);background:linear-gradient(180deg,rgba(14,80,170,.82),rgba(2,23,65,.90));border-radius:24px;padding:20px;box-shadow:0 18px 40px rgba(0,0,0,.3)}.stadiumIcon{width:92px;height:92px;border-radius:999px;margin:0 auto 16px;display:grid;place-items:center;font-size:44px;background:linear-gradient(135deg,#0ea5e9,#1d4ed8);border:4px solid rgba(255,255,255,.16);box-shadow:0 0 0 10px rgba(14,165,233,.14)}.stadiumIntro h2{margin:0;text-align:center;font-size:27px;line-height:.95;letter-spacing:-.04em}.stadiumIntro .subtitle{text-align:center;color:#bfe5ff;font-weight:900;margin:10px 0 18px;text-transform:uppercase;letter-spacing:.1em}.legendBox{border:1px solid rgba(255,255,255,.20);background:rgba(255,255,255,.08);border-radius:16px;padding:12px;margin-top:16px}.legendItem{display:flex;align-items:center;gap:10px;margin:8px 0;font-weight:850}.legendSwatch{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:13px}.swAtt{background:#22c55e}.swNo{background:#334155}.swKenny{background:#f59e0b}.swHistoric{background:#6b7280}.stadiumStatsGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.stadiumStat{border:1px solid rgba(147,197,253,.42);background:linear-gradient(180deg,rgba(15,23,42,.82),rgba(15,23,42,.58));border-radius:18px;padding:16px}.stadiumStat .value{font-size:31px;font-weight:950;color:#38bdf8}.stadiumStat:nth-child(3) .value{color:#facc15}.stadiumStat:nth-child(4) .value{color:#c084fc}.stadiumStat .label{font-size:11px;color:#dbeafe;text-transform:uppercase;letter-spacing:.09em;font-weight:900}.stadiumBoards{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.leaderCard,.mapCard,.bucketCard{border:1px solid rgba(147,197,253,.40);background:rgba(15,23,42,.72);border-radius:20px;padding:16px}.leaderRow{display:grid;grid-template-columns:36px 90px 1fr 42px;gap:10px;align-items:center;margin:10px 0}.rankMedal{font-size:22px}.leaderName{font-weight:950}.barTrack{height:14px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden}.barFill{height:100%;border-radius:999px;background:linear-gradient(90deg,#22c55e,#38bdf8,#facc15)}.miniMap{position:relative;height:258px;border-radius:18px;background:linear-gradient(135deg,rgba(12,74,110,.72),rgba(22,101,52,.34)),radial-gradient(circle at 40% 42%,rgba(255,255,255,.16),transparent 36%);border:1px solid rgba(255,255,255,.18);overflow:hidden}.miniMap:before{content:"USA Stadium Map";position:absolute;left:16px;top:14px;color:rgba(255,255,255,.5);font-weight:950;letter-spacing:.08em;text-transform:uppercase;font-size:12px}.mapDot{position:absolute;width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 0 16px rgba(34,197,94,.9);cursor:pointer}.mapDot.kenny{background:#f59e0b;box-shadow:0 0 18px rgba(245,158,11,.95)}.mapDot.none{background:#ef4444;box-shadow:0 0 18px rgba(239,68,68,.8)}.mapDot.historic{background:#9ca3af;box-shadow:0 0 16px rgba(156,163,175,.75)}.mapTip{position:absolute;right:12px;bottom:12px;max-width:250px;background:rgba(2,6,23,.88);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:11px;font-size:12px;color:#e0f2fe}.stadiumTools{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.stadiumTools input,.stadiumTools select{background:rgba(2,6,23,.72);border-color:rgba(125,211,252,.42);color:#fff}.stadiumTableWrap{overflow:auto;border:1px solid rgba(147,197,253,.40);border-radius:18px;background:rgba(2,6,23,.54)}.stadiumTable{border-collapse:separate;border-spacing:0;width:100%;min-width:980px}.stadiumTable th{position:sticky;top:0;z-index:3;padding:10px 12px;text-align:center;background:#0f2a52;color:#fff;border-bottom:1px solid rgba(255,255,255,.18);font-weight:950}.stadiumTable th:first-child{text-align:left;left:0;z-index:4}.stadiumTable td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.12);border-right:1px solid rgba(255,255,255,.10);text-align:center;font-weight:950}.stadiumTable td:first-child{position:sticky;left:0;text-align:left;background:rgba(241,245,249,.95);color:#0f172a;z-index:2;font-weight:900}.stadiumTable tr:nth-child(even) td:first-child{background:rgba(226,232,240,.95)}.attCell{background:linear-gradient(180deg,#77d96d,#22c55e);color:#fff;font-size:20px;text-shadow:0 1px 1px rgba(0,0,0,.25)}.missCell{background:linear-gradient(180deg,#334155,#1e293b);color:#9ca3af}.historicRow td:first-child{background:rgba(209,213,219,.95)!important;color:#374151}.historicRow .missCell{background:linear-gradient(180deg,#6b7280,#4b5563)}.memberHeader{color:#fff!important}.footerTotals td{background:#0f172a!important;color:#fff!important;font-size:18px;border-top:3px solid rgba(250,204,21,.75)}.footerTotals td:first-child{text-transform:uppercase;font-size:14px;color:#fef3c7!important}.bucketGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}.bucketItem{background:rgba(2,6,23,.55);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px}.bucketTitle{font-weight:950;color:#fef3c7}.bucketMeta{font-size:12px;color:#bfdbfe;margin-top:5px}.hideMainDashboard main>section:not(#stadiumAttendancePanel):not(#standingsPanel),.hideMainDashboard main>#games,.hideMainDashboard main>#empty{display:none!important}.hideMainDashboard .toolbar{display:none!important}body.light .stadiumShell{color:#fff}body.light .stadiumTable td:first-child{color:#0f172a}
+.memberSpotlight{margin:18px 0;border:1px solid rgba(250,204,21,.42);background:linear-gradient(135deg,rgba(250,204,21,.18),rgba(14,165,233,.16),rgba(34,197,94,.12));border-radius:22px;padding:16px;box-shadow:0 16px 34px rgba(0,0,0,.22)}
+.memberSpotlightTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}.memberSpotlightTitle{font-size:22px;font-weight:950;letter-spacing:-.03em}.memberSpotlightMeta{color:#dbeafe;font-size:13px;margin-top:4px}.memberChips{display:flex;gap:9px;flex-wrap:wrap}.memberChip{border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:999px;padding:9px 12px;font-weight:950;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.20);transition:.16s}.memberChip:hover{transform:translateY(-1px);filter:brightness(1.08)}.memberChip.active{box-shadow:0 0 0 3px rgba(250,204,21,.40),0 12px 24px rgba(0,0,0,.28);border-color:#fef08a}.memberChip.all{background:linear-gradient(135deg,#0ea5e9,#22c55e)}.memberSelectBig{min-width:240px;border-color:rgba(250,204,21,.65)!important;background:rgba(2,6,23,.78)!important;font-weight:950}.memberProfileGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:12px}.memberProfileCard{background:rgba(2,6,23,.58);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px}.memberProfileCard .big{font-size:24px;font-weight:950;color:#facc15}.memberProfileCard .small{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#bfdbfe;font-weight:900}.selectedMemberHeader{outline:3px solid rgba(250,204,21,.75);outline-offset:-3px}.selectedMemberCell{box-shadow:inset 0 0 0 3px rgba(250,204,21,.55)}
+
+@media(max-width:900px){.stadiumHero,.stadiumBoards{grid-template-columns:1fr}.stadiumStatsGrid{grid-template-columns:repeat(2,1fr)}}
+
+/* V17 NFL Standings Center */
+.standingsTabButton{flex-basis:175px;background:linear-gradient(135deg,#7c3aed,#2563eb 55%,#0f172a)!important;color:#fff!important;border-color:#8b5cf6!important}.standingsTabButton:before{background:#facc15}.standingsTabButton.active{background:linear-gradient(135deg,#f59e0b,#7c3aed)!important;color:#fff!important}.standingsShell{display:none;position:relative;overflow:hidden;background:radial-gradient(circle at 15% 0%,rgba(124,58,237,.22),transparent 28%),radial-gradient(circle at 90% 8%,rgba(37,99,235,.20),transparent 30%),linear-gradient(145deg,var(--panel),var(--panel2));border-color:#6d5bd0}.standingsHeader{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.standingsTitle{font-size:34px;font-weight:950;letter-spacing:-.04em;margin:0}.standingsSub{color:var(--muted);margin-top:6px;max-width:820px}.standingsControls{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.standingsControls button{border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:999px;padding:9px 14px;font-weight:900;cursor:pointer}.standingsControls button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--activeText);border-color:var(--accent)}.standingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.conferenceBoard{display:flex;flex-direction:column;gap:14px}.conferenceTitle{font-size:24px;font-weight:950;letter-spacing:-.03em;padding:3px 2px}.divisionCard{background:var(--field);border:1px solid var(--border);border-radius:20px;overflow:hidden}.divisionHead{padding:13px 15px;font-weight:950;background:linear-gradient(135deg,var(--panel2),var(--field));border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px}.standingsTable{width:100%;border-collapse:collapse}.standingsTable th,.standingsTable td{padding:10px 9px;border-bottom:1px solid var(--border);text-align:right;font-size:13px}.standingsTable th:first-child,.standingsTable td:first-child{text-align:left}.standingsTable th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}.standingsTeamRow{cursor:pointer;transition:.15s}.standingsTeamRow:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}.standingsTeam{display:flex;align-items:center;gap:9px;font-weight:950}.standingRank{width:22px;height:22px;border-radius:999px;display:inline-grid;place-items:center;background:var(--panel2);border:1px solid var(--border);font-size:11px}.standingRecord{font-weight:950}.diffPos{color:#22c55e;font-weight:900}.diffNeg{color:#ef4444;font-weight:900}.teamScheduleDrawer{display:none;margin-top:20px;border:1px solid var(--border);border-radius:22px;background:linear-gradient(180deg,var(--field),var(--panel2));padding:18px}.teamScheduleDrawer.active{display:block}.drawerTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}.drawerTitle{font-size:28px;font-weight:950;letter-spacing:-.03em}.drawerRecord{font-size:16px;font-weight:900;color:var(--accent)}.drawerBack{border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:12px;padding:9px 12px;font-weight:900;cursor:pointer}.scheduleResultGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:11px}.scheduleResultCard{border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:16px;padding:13px;background:var(--game)}.scheduleResultCard.finalWin{border-left-color:#22c55e}.scheduleResultCard.finalLoss{border-left-color:#ef4444}.scheduleResultCard.finalTie{border-left-color:#f59e0b}.scheduleStatus{font-size:12px;font-weight:950;margin-top:8px}.scheduleStatus.win{color:#22c55e}.scheduleStatus.loss{color:#ef4444}.scheduleStatus.tie{color:#f59e0b}.standingsNote{margin-top:14px;color:var(--muted);font-size:12px}.clickHint{display:inline-flex;align-items:center;gap:6px;color:var(--accent2);font-size:12px;font-weight:900}@media(max-width:950px){.standingsGrid{grid-template-columns:1fr}.standingsTable th:nth-child(6),.standingsTable td:nth-child(6),.standingsTable th:nth-child(7),.standingsTable td:nth-child(7){display:none}}
+
+
+/* V19 Weekly Scoreboard */
+.weekScoreboard{margin-bottom:18px;border-left:7px solid var(--accent);display:none}
+.weekScoreboard.show{display:block}
+.weekScoreHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.weekScoreTitle{font-size:24px;font-weight:950;letter-spacing:-.03em}
+.weekScoreMeta{color:var(--muted);font-size:13px}
+.weekScoreGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.scoreSummaryGame{border:1px solid var(--border);background:linear-gradient(180deg,var(--field),var(--panel2));color:var(--text);border-radius:16px;padding:12px 13px;text-align:left;cursor:pointer;transition:.16s;box-shadow:0 6px 16px var(--shadow)}
+.scoreSummaryGame:hover{transform:translateY(-2px);border-color:var(--accent)}
+.scoreSummaryGame .scoreTeams{display:grid;grid-template-columns:1fr auto;gap:7px 12px;align-items:center}
+.scoreSummaryGame .scoreTeam{font-weight:850}
+.scoreSummaryGame .scoreTeam.winner{font-weight:950;color:var(--accent)}
+body.light .scoreSummaryGame .scoreTeam.winner{color:var(--lightTeamMain,#0c2340)}
+.scoreSummaryGame .scoreNum{font-size:20px;font-weight:950}
+.scoreSummaryGame .scoreStatus{margin-top:8px;font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:900}
+.game.jumpFlash{animation:jumpFlash 1.5s ease}
+@keyframes jumpFlash{0%,100%{box-shadow:0 8px 20px var(--shadow)}35%{box-shadow:0 0 0 4px var(--accent),0 12px 30px var(--shadow)}}
+
+
+/* V22 - Annual Football Trip highlight */
+.tab.football-trip{position:relative;border:2px solid #f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.16) inset;background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(251,191,36,.07));}
+.tab.football-trip .w::after{content:" • 🏈 TRIP";font-size:.68em;font-weight:900;color:#b45309;letter-spacing:.04em;}
+body.dark .tab.football-trip .w::after{color:#fbbf24;}
+.tab.football-trip.active{box-shadow:0 0 0 2px #f59e0b inset,0 8px 22px rgba(245,158,11,.22);}
+.footballTripBanner{display:none;margin:0 0 16px;padding:14px 18px;border-radius:14px;border:1px solid #f59e0b;background:linear-gradient(90deg,rgba(245,158,11,.18),rgba(251,191,36,.06));font-weight:900;font-size:1.05rem;}
+.footballTripBanner.show{display:flex;align-items:center;gap:10px;}
+
+/* V23 - Stadium Chasers attended-game highlights */
+.game.tripGame{border:2px solid #f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.14) inset,0 10px 24px var(--shadow);position:relative;overflow:visible}
+.game.tripGame::before{content:"🏟️ STADIUM CHASERS • WE'RE THERE";display:inline-block;margin:-2px 0 10px -2px;padding:6px 10px;border-radius:10px 0 10px 0;background:#f59e0b;color:#111827;font-size:10px;font-weight:950;letter-spacing:.08em}
+body.dark .game.tripGame{border-color:#fbbf24}
+
+/* V30 Live Scoreboard */
+.liveScoreNav{display:none;max-width:1400px;margin:0 auto;padding:0 20px 10px}
+.liveScoreNav.show{display:block}.liveScoreBtn{width:100%;border:1px solid #ef4444;background:linear-gradient(135deg,#7f1d1d,#dc2626 55%,#111827);color:#fff;border-radius:16px;padding:12px 16px;font-weight:950;letter-spacing:.04em;cursor:pointer;box-shadow:0 8px 24px rgba(239,68,68,.18)}
+.liveScoreBtn .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#fff;margin-right:8px;box-shadow:0 0 0 0 rgba(255,255,255,.7);animation:livePulse 1.5s infinite}
+@keyframes livePulse{70%{box-shadow:0 0 0 10px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+#liveScoreboardPanel{display:none;margin-top:0;border-color:#ef4444;background:radial-gradient(circle at 10% 0%,rgba(239,68,68,.16),transparent 26%),linear-gradient(145deg,var(--panel),var(--panel2))}
+#liveScoreboardPanel.open{display:block}.liveScoreHead{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}.liveScoreTitle{font-size:30px;font-weight:950;letter-spacing:-.04em}.liveScoreMeta{color:var(--muted);font-size:13px;margin-top:4px}
+.liveScoreGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.liveGame{border:1px solid var(--border);background:var(--field);border-radius:18px;padding:14px}.liveGame.in{border-color:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,.13)}.liveStatus{font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}.liveGame.in .liveStatus{color:#f87171}.liveGame.post .liveStatus{color:#4ade80}.liveTeamRow{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:9px 0}.liveTeam{font-weight:900}.liveScore{font-size:26px;font-weight:950}.liveDetails{font-size:12px;color:var(--muted);margin-top:8px}.liveRefreshBtn{border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:10px;padding:8px 12px;font-weight:850;cursor:pointer}
+
+
+/* V31 Stadium Chasers Fantasy */
+.fantasyTickerWrap{max-width:1400px;margin:0 auto;padding:0 20px 10px}
+.fantasyTicker{display:none;border:1px solid #22c55e;background:linear-gradient(135deg,#052e16,#14532d 58%,#0f172a);color:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(34,197,94,.15)}
+.fantasyTicker.show{display:block}.fantasyTickerTop{display:flex;align-items:center;gap:12px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.12)}
+.fantasyTickerTitle{font-weight:950;white-space:nowrap}.fantasyTickerMeta{font-size:11px;color:#bbf7d0;white-space:nowrap}
+.fantasyTickerTrack{overflow:hidden;position:relative}.fantasyTickerItems{display:flex;gap:18px;min-width:max-content;padding:10px 14px;animation:fantasyMarquee 120s linear infinite}
+.fantasyTicker:hover .fantasyTickerItems{animation-play-state:paused}@keyframes fantasyMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.fantasyTickItem{font-size:13px;font-weight:850;white-space:nowrap}.fantasyTickItem strong{color:#fde68a}.fantasyTickerBtn{margin-left:auto;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:6px 10px;font-weight:850;cursor:pointer}
+#fantasyPanel{display:none;border-color:#22c55e;background:radial-gradient(circle at 10% 0%,rgba(34,197,94,.16),transparent 28%),linear-gradient(145deg,var(--panel),var(--panel2))}
+#fantasyPanel.open{display:block}.fantasyHead{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}.fantasyTitle{font-size:30px;font-weight:950;letter-spacing:-.04em}.fantasyMeta{color:var(--muted);font-size:13px;margin-top:4px}
+.fantasyGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.fantasyMatch{border:1px solid var(--border);background:var(--field);border-radius:18px;padding:14px}.fantasyMatchRow{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;margin:9px 0}.fantasyLogo{width:34px;height:34px;border-radius:8px;object-fit:contain;background:#fff}.fantasyTeamName{font-weight:900}.fantasyRecord{font-size:11px;color:var(--muted)}.fantasyScore{font-size:25px;font-weight:950}.fantasyProjected{font-size:11px;color:#86efac;text-align:right}.fantasyRefreshBtn{border:1px solid var(--border);background:var(--field);color:var(--text);border-radius:10px;padding:8px 12px;font-weight:850;cursor:pointer}
+
+
+/* V32 Big Plays ticker */
+.bigPlayWrap{display:none;max-width:1400px;margin:0 auto;padding:0 20px 10px}
+.bigPlayWrap.show{display:block}
+.bigPlayTicker{border:1px solid #f59e0b;background:linear-gradient(135deg,#451a03,#b45309 55%,#111827);color:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(245,158,11,.17)}
+.bigPlayTop{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.14)}
+.bigPlayTitle{font-weight:950;letter-spacing:.06em;white-space:nowrap}.bigPlayMeta{font-size:11px;color:#fde68a;white-space:nowrap}
+.bigPlayBtn{margin-left:auto;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:6px 10px;font-weight:850;cursor:pointer}
+.bigPlayTrack{overflow:hidden}.bigPlayItems{display:flex;gap:18px;min-width:max-content;padding:10px 14px;animation:bigPlayMarquee 120s linear infinite}
+.bigPlayTicker:hover .bigPlayItems{animation-play-state:paused}@keyframes bigPlayMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.bigPlayItem{font-size:13px;font-weight:850;white-space:nowrap}.bigPlayItem strong{color:#fde68a}
+#bigPlayPanel{display:none;border-color:#f59e0b;background:radial-gradient(circle at 10% 0%,rgba(245,158,11,.15),transparent 28%),linear-gradient(145deg,var(--panel),var(--panel2))}
+#bigPlayPanel.open{display:block}.bigPlayList{display:grid;gap:10px}.bigPlayCard{border:1px solid var(--border);background:var(--field);border-radius:14px;padding:12px}.bigPlayCardTitle{font-weight:950}.bigPlayCardMeta{font-size:12px;color:var(--muted);margin-top:4px}
+
+
+/* V33 Per-game live play ticker */
+.liveGameTicker{display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:8px;overflow:hidden}
+.liveGameTicker.show{display:block}
+.liveGameTickerLabel{font-size:10px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:#f59e0b;margin-bottom:5px}
+.liveGameTickerTrack{overflow:hidden}
+.liveGameTickerItems{display:flex;gap:16px;min-width:max-content;animation:liveGameTickerScroll 140s linear infinite}
+.liveGame:hover .liveGameTickerItems{animation-play-state:paused}
+.liveGameTickerItem{font-size:11px;font-weight:800;white-space:nowrap;color:var(--text)}
+.liveGameTickerItem strong{color:#f59e0b}
+@keyframes liveGameTickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+
+/* V34 Fantasy Impact ticker */
+.fantasyImpactWrap{display:none;max-width:1400px;margin:0 auto;padding:0 20px 10px}
+.fantasyImpactWrap.show{display:block}
+.fantasyImpactTicker{border:1px solid #a855f7;background:linear-gradient(135deg,#3b0764,#7e22ce 55%,#111827);color:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(168,85,247,.18)}
+.fantasyImpactTop{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.14)}
+.fantasyImpactTitle{font-weight:950;letter-spacing:.05em;white-space:nowrap}.fantasyImpactMeta{font-size:11px;color:#e9d5ff;white-space:nowrap}
+.fantasyImpactTrack{overflow:hidden;border-top:1px solid rgba(255,255,255,.10)}
+.fantasyImpactRowLabel{font-size:10px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:#e9d5ff;padding:6px 14px 0}
+.fantasyImpactItems{display:flex;gap:18px;min-width:max-content;padding:7px 14px 9px;animation:fantasyImpactMarquee 120s linear infinite}
+#fantasyImpactItems{animation-duration:20s}
+.fantasyImpactTicker:hover .fantasyImpactItems{animation-play-state:paused}
+.fantasyImpactItem{font-size:13px;font-weight:850;white-space:nowrap}.fantasyImpactItem strong{color:#fde68a}
+@keyframes fantasyImpactMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
+  <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
+  <aside class="cornerStatus" aria-label="Dashboard version status">
+    <div class="ver" id="cornerVersion">v34.9</div>
+    <div class="stampLabel">Last Updated</div>
+    <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
+  </aside>
+  <div class="toolbar"><input id="search" class="search" placeholder="Search within selected week: team, city, network, or matchup..."/><select id="networkFilter"><option value="">All networks</option></select><label class="filterToggle"><input id="primeFilter" type="checkbox"/> Primetime / Special</label><button id="printWeek" class="themeToggle secondaryBtn" type="button">🖨️ Print Week</button><button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle light and dark mode">☀️ Light mode</button></div>
+</header>
+
+
+<div id="fantasyTickerWrap" class="fantasyTickerWrap">
+  <div id="fantasyTicker" class="fantasyTicker">
+    <div class="fantasyTickerTop">
+      <span>🏆</span><span class="fantasyTickerTitle">Stadium Chasers Fantasy</span>
+      <span id="fantasyTickerMeta" class="fantasyTickerMeta">Connecting…</span>
+      <button id="fantasyTickerBtn" class="fantasyTickerBtn" type="button">Open Fantasy</button>
+    </div>
+    <div class="fantasyTickerTrack"><div id="fantasyTickerItems" class="fantasyTickerItems"></div></div>
+  </div>
+</div>
+
+
+
+<div id="fantasyImpactWrap" class="fantasyImpactWrap">
+  <div class="fantasyImpactTicker">
+    <div class="fantasyImpactTop">
+      <span>🔥</span><span class="fantasyImpactTitle">FF PLAYER LIVE</span>
+      <span id="fantasyImpactMeta" class="fantasyImpactMeta">Waiting for a fantasy scoring impact…</span>
+    </div>
+    <div class="fantasyImpactTrack">
+      <div class="fantasyImpactRowLabel">Breaking FF Scoring</div>
+      <div id="fantasyImpactItems" class="fantasyImpactItems"></div>
+    </div>
+    <div class="fantasyImpactTrack">
+      <div class="fantasyImpactRowLabel">Live Player Scores</div>
+      <div id="fantasyImpactScores" class="fantasyImpactItems"></div>
+    </div>
+  </div>
+</div>
+
+<div id="bigPlayWrap" class="bigPlayWrap">
+  <div class="bigPlayTicker">
+    <div class="bigPlayTop">
+      <span>🚨</span><span class="bigPlayTitle">BIG PLAYS</span>
+      <span id="bigPlayMeta" class="bigPlayMeta">Watching live games…</span>
+      <button id="bigPlayBtn" class="bigPlayBtn" type="button">Recent Plays</button>
+    </div>
+    <div class="bigPlayTrack"><div id="bigPlayItems" class="bigPlayItems"></div></div>
+  </div>
+</div>
+
+<div id="liveScoreNav" class="liveScoreNav"><button id="liveScoreBtn" class="liveScoreBtn" type="button"><span class="dot"></span><span id="liveScoreBtnText">LIVE SCOREBOARD</span></button></div>
+<div class="tabs-wrap"><div class="navShell"><div id="tabs" class="tabs"></div><div id="completedTabsBar" class="completedTabsBar" aria-label="Completed weeks"><span class="completedTabsLabel">Completed</span><div id="completedTabs" style="display:flex;gap:8px"></div></div></div></div>
+<main>
+
+
+
+<section id="bigPlayPanel" class="card" aria-label="Recent NFL big plays">
+  <div class="liveScoreHead"><div><div class="nextLabel">NFL Live</div><div class="liveScoreTitle">Recent Big Plays</div><div id="bigPlayPanelMeta" class="liveScoreMeta">Touchdowns, turnovers and explosive plays from games in progress.</div></div></div>
+  <div id="bigPlayList" class="bigPlayList"></div>
+</section>
+
+<section id="fantasyPanel" class="card" aria-label="Stadium Chasers fantasy scoreboard">
+  <div class="fantasyHead"><div><div class="nextLabel">ESPN Fantasy</div><div class="fantasyTitle">Stadium Chasers Fantasy</div><div id="fantasyMeta" class="fantasyMeta">Loading league matchups…</div></div><button id="fantasyRefresh" class="fantasyRefreshBtn" type="button">Refresh now</button></div>
+  <div id="fantasyGrid" class="fantasyGrid"></div>
+</section>
+
+<section id="liveScoreboardPanel" class="card" aria-label="Live NFL scoreboard">
+  <div class="liveScoreHead"><div><div class="nextLabel">NFL Live</div><div class="liveScoreTitle">Live Scoreboard</div><div id="liveScoreMeta" class="liveScoreMeta">Checking today's games…</div></div><button id="liveScoreRefresh" class="liveRefreshBtn" type="button">Refresh now</button></div>
+  <div id="liveScoreGrid" class="liveScoreGrid"></div>
+</section>
+
+  <div id="footballTripBanner" class="footballTripBanner">🏈 STADIUM CHASERS UNITE 🏟️ • Annual Football Trip • Week 8</div>
+<section id="weekScoreboard" class="card weekScoreboard" aria-label="Weekly results scoreboard">
+    <div class="weekScoreHead"><div><div class="nextLabel">Weekly Results</div><div id="weekScoreTitle" class="weekScoreTitle">Week Scoreboard</div><div id="weekScoreMeta" class="weekScoreMeta"></div></div><span class="pill">Click a result to jump to game details</span></div>
+    <div id="weekScoreGrid" class="weekScoreGrid"></div>
+  </section>
+  <section class="hero">
+    <div class="card nextEvent"><div id="nextEventLabel" class="nextLabel">Next NFL Event of Week</div><div id="nextMatch" class="nextMatch">Loading...</div><div id="nextCountdown" class="nextCountdown">--</div><div id="nextTimes"></div><div id="nextMeta" class="nextMeta"></div></div>
+    <div class="card"><div class="week-title"><div><h2 id="weekName"></h2><div id="weekRange" class="meta"></div></div><span id="gameCount" class="pill"></span></div><div class="big-count"><div class="count-box"><div id="d" class="num">--</div><div class="lbl">Days</div></div><div class="count-box"><div id="h" class="num">--</div><div class="lbl">Hours</div></div><div class="count-box"><div id="m" class="num">--</div><div class="lbl">Minutes</div></div><div class="count-box"><div id="s" class="num">--</div><div class="lbl">Seconds</div></div></div></div>
+  </section>
+  <section class="card statusCard" aria-label="Season progress">
+    <div class="statusHeader"><div><div class="nextLabel">Dashboard Status</div><div class="statusTitle">Season Progress</div></div><span class="pill" id="statusGamesCompleted">0 / 272 games completed</span></div>
+    <div class="progressWrap"><div id="seasonProgressBar" class="progressBar"></div></div>
+    <div id="seasonProgressMeta" class="progressMeta">Season Progress: 0%</div>
+  </section>
+  <section class="card teamPanel"><h3 style="margin-top:0"><span id="commandTitleTeam">Steelers</span> Command Center</h3><div class="meta">Select any NFL team to personalize the dashboard, view the next game countdown, scan quick Command Center tabs, and open the full Week 1 through Week 18 schedule only when you need it.</div><div class="commandControls"><label class="lbl" for="commandTeamSelect">Command Center Team</label><select id="commandTeamSelect" aria-label="Choose Command Center team"></select></div><div id="commandHero" class="commandHero"></div><div id="steelersStats" class="commandGrid"></div><nav class="commandSubtabs" aria-label="Command Center quick tabs"><button class="commandSubtab active" data-command-tab="overview">Overview</button><button class="commandSubtab" data-command-tab="primetime">Primetime / Special</button><button class="commandSubtab" data-command-tab="division">Standings</button></nav><section id="commandOverview" class="commandPane active"><div class="meta">Use the quick tabs above for the compact Command Center view. Open the full schedule below only when you want all 18 weeks.</div></section><section id="primeBoard" class="commandPane"></section><section id="divisionBoard" class="divisionBoard commandPane"></section><details id="fullTeamScheduleDetails" class="scheduleDisclosure"><summary><span id="scheduleSummaryTitle">Show Full Team Schedule</span><span class="summaryMeta">Week 1 through Week 18</span></summary><section id="steelersSchedule" class="steelersSchedule"></section></details></section>
+  <section class="card teamPanel"><h3 style="margin-top:0">Team Full Season Schedule</h3><div class="meta">Type a team name or city, like <b>Steelers</b>, <b>Pittsburgh</b>, <b>Patriots</b>, or <b>Dallas</b>, to see that team from Week 1 through Week 18.</div><input id="teamSearch" class="search" style="width:100%;margin-top:12px" placeholder="Team Full Season Schedule search..."/><div id="teamHint" class="teamHint"></div><section id="teamResults" class="teamResults"></section></section>
+  
+  <section id="standingsPanel" class="card standingsShell" aria-label="NFL Standings Center">
+    <div class="standingsHeader">
+      <div><div class="nextLabel">Version 26 Feature</div><h2 class="standingsTitle">🏆 NFL Standings Center</h2><div class="standingsSub">Current division standings through October 1, 2026. Click any team to open its full Week 1–18 schedule with completed results and upcoming games.</div></div>
+      <span class="pill">Updated through Week 4 TNF</span>
+    </div>
+    <div class="standingsControls">
+      <button type="button" class="active" data-conf="ALL">All NFL</button><button type="button" data-conf="AFC">AFC</button><button type="button" data-conf="NFC">NFC</button>
+      <input id="standingsSearch" class="search" style="max-width:360px" placeholder="Find a team in standings..."/>
+    </div>
+    <div id="standingsGrid" class="standingsGrid"></div>
+    <div class="standingsNote">Standings are a static snapshot tied to the scores loaded in this dashboard. Division ordering for tied records reflects the NFL standings snapshot used for this V17 update.</div>
+    <section id="standingsTeamDrawer" class="teamScheduleDrawer" aria-label="Selected team season schedule"></section>
+  </section>
+
+  <section id="stadiumAttendancePanel" class="card stadiumShell" aria-label="Stadium Attendance Center">
+    <div class="stadiumContent">
+      <div class="stadiumHero">
+        <aside class="stadiumIntro">
+          <div class="stadiumIcon">🏟️</div>
+          <h2>Stadium<br>Attendance</h2>
+          <div class="subtitle">Group List</div>
+          <div class="meta" style="color:#e0f2fe">Group members and the NFL stadiums they have attended. The matrix and totals below mirror the latest group attendance tracker.</div>
+          <div class="legendBox">
+            <div class="legendItem"><span class="legendSwatch swAtt">✓</span> Attended</div>
+            <div class="legendItem"><span class="legendSwatch swNo">–</span> Not Attended</div>
+            <div class="legendItem"><span class="legendSwatch swKenny">✓</span> Kenny</div>
+          </div>
+        </aside>
+        <div>
+          <div class="stadiumStatsGrid" id="stadiumStatsGrid"></div>
+          <div class="stadiumBoards">
+            <div class="leaderCard"><div class="nextLabel">Leaderboard</div><div id="stadiumLeaderboard"></div></div>
+            <div class="mapCard"><div class="nextLabel">Interactive Stadium Map</div><div class="miniMap" id="stadiumMiniMap"><div class="mapTip" id="stadiumMapTip">Hover a stadium dot to see who has attended. Gold dots include Kenny. Red dots mean no active member has visited yet.</div></div></div>
+          </div>
+        </div>
+      </div>
+      <section class="memberSpotlight" aria-label="Member Stadium View">
+        <div class="memberSpotlightTop">
+          <div><div class="nextLabel">Member View</div><div class="memberSpotlightTitle" id="memberSpotlightTitle">Group Summary</div><div class="memberSpotlightMeta" id="memberSpotlightMeta">Select a group member to personalize the stats, map colors, bucket list, and attendance table.</div></div>
+          <select id="stadiumMemberQuickSelect" class="memberSelectBig" aria-label="Choose attendance member"><option value="">Group Summary</option></select>
+        </div>
+        <div class="memberChips" id="stadiumMemberChips"></div>
+        <div class="memberProfileGrid" id="memberProfileGrid"></div>
+      </section>
+      <div class="stadiumTools"><input id="stadiumSearch" class="search" placeholder="Search stadium, team, or city..."/><select id="stadiumMemberFilter"><option value="">All members</option></select><select id="stadiumStatusFilter"><option value="">All stadiums</option><option value="visited">Visited by selected member</option><option value="missing">Missing for selected member</option><option value="current">Current NFL stadiums only</option></select></div>
+      <div class="stadiumTableWrap"><table class="stadiumTable" id="stadiumAttendanceTable"></table></div>
+      <div class="bucketGrid" id="stadiumBucketGrid"></div>
+    </div>
+  </section>
+
+  <section id="games"></section><div id="empty" class="empty">No games match your filter.</div>
+</main>
+
+<div id="boxScoreModal" class="boxScoreModal" aria-hidden="true">
+  <div class="boxScoreDialog" role="dialog" aria-modal="true" aria-label="NFL box score">
+    <div class="boxScoreTop"><div id="boxScoreTitle" class="boxScoreTitle">Box Score</div><button id="boxScoreClose" class="boxScoreClose" type="button">Close Box Score</button></div>
+    <div id="boxScoreBody" class="boxScoreBody"></div>
+  </div>
+</div>
+<footer class="appFooter" aria-label="Dashboard footer">
+  <div class="footerCard">
+    <div class="footerTitle">2026 NFL Dashboard</div>
+    <div class="footerLine"><strong id="footerVersion">Version 14</strong></div>
+    <div class="footerLine" id="footerLastUpdated">Last Updated: June 6, 2026 • 10:35 AM ET</div>
+    <div class="footerLine">Maintained by Kenny Landry</div>
+  </div>
+</footer>
+<script>
+const weeks = [
+{week:1,start:'2026-09-09T20:20:00-04:00',range:'Sep 9-14, 2026',games:[['New England Patriots at Seattle Seahawks','Wed','8:20p ET','NBC'],['San Francisco 49ers vs Los Angeles Rams (Melbourne)','Thu','8:35p ET','Netflix'],['Chicago Bears at Carolina Panthers','Sun','1:00p ET','FOX'],['Tampa Bay Buccaneers at Cincinnati Bengals','Sun','1:00p ET','FOX'],['New Orleans Saints at Detroit Lions','Sun','1:00p ET','FOX'],['Buffalo Bills at Houston Texans','Sun','1:00p ET','CBS'],['Baltimore Ravens at Indianapolis Colts','Sun','1:00p ET','CBS'],['Cleveland Browns at Jacksonville Jaguars','Sun','1:00p ET','CBS'],['Atlanta Falcons at Pittsburgh Steelers','Sun','1:00p ET','FOX'],['New York Jets at Tennessee Titans','Sun','1:00p ET','CBS'],['Arizona Cardinals at Los Angeles Chargers','Sun','4:25p ET','CBS'],['Miami Dolphins at Las Vegas Raiders','Sun','4:25p ET','FOX'],['Green Bay Packers at Minnesota Vikings','Sun','4:25p ET','CBS'],['Washington Commanders at Philadelphia Eagles','Sun','4:25p ET','FOX'],['Dallas Cowboys at New York Giants','Sun','8:20p ET','NBC'],['Denver Broncos at Kansas City Chiefs','Mon','8:15p ET','ESPN/ABC']]},
+{week:2,start:'2026-09-17T20:15:00-04:00',range:'Sep 17-21, 2026',games:[['Detroit Lions at Buffalo Bills','Thu','8:15p ET','AMZ'],['Carolina Panthers at Atlanta Falcons','Sun','1:00p ET','FOX'],['New Orleans Saints at Baltimore Ravens','Sun','1:00p ET','CBS'],['Minnesota Vikings at Chicago Bears','Sun','1:00p ET','FOX'],['Cincinnati Bengals at Houston Texans','Sun','1:00p ET','CBS'],['Pittsburgh Steelers at New England Patriots','Sun','1:00p ET','CBS'],['Green Bay Packers at New York Jets','Sun','1:00p ET','FOX'],['Cleveland Browns at Tampa Bay Buccaneers','Sun','1:00p ET','CBS'],['Philadelphia Eagles at Tennessee Titans','Sun','1:00p ET','FOX'],['Jacksonville Jaguars at Denver Broncos','Sun','4:05p ET','CBS'],['Las Vegas Raiders at Los Angeles Chargers','Sun','4:05p ET','CBS'],['Seattle Seahawks at Arizona Cardinals','Sun','4:25p ET','FOX'],['Washington Commanders at Dallas Cowboys','Sun','4:25p ET','FOX'],['Miami Dolphins at San Francisco 49ers','Sun','4:25p ET','FOX'],['Indianapolis Colts at Kansas City Chiefs','Sun','8:20p ET','NBC'],['New York Giants at Los Angeles Rams','Mon','8:15p ET','ESPN/ABC']]},
+{week:3,start:'2026-09-24T20:15:00-04:00',range:'Sep 24-28, 2026',games:[['Atlanta Falcons at Green Bay Packers','Thu','8:15p ET','AMZ'],['Los Angeles Chargers at Buffalo Bills','Sun','1:00p ET','FOX'],['Carolina Panthers at Cleveland Browns','Sun','1:00p ET','FOX'],['New York Jets at Detroit Lions','Sun','1:00p ET','FOX'],['Houston Texans at Indianapolis Colts','Sun','1:00p ET','CBS'],['New England Patriots at Jacksonville Jaguars','Sun','1:00p ET','CBS'],['Kansas City Chiefs at Miami Dolphins','Sun','1:00p ET','CBS'],['Tennessee Titans at New York Giants','Sun','1:00p ET','CBS'],['Cincinnati Bengals at Pittsburgh Steelers','Sun','1:00p ET','CBS'],['Seattle Seahawks at Washington Commanders','Sun','1:00p ET','FOX'],['Arizona Cardinals at San Francisco 49ers','Sun','4:05p ET','FOX'],['Minnesota Vikings at Tampa Bay Buccaneers','Sun','4:05p ET','FOX'],['Baltimore Ravens vs Dallas Cowboys (Rio de Janeiro)','Sun','4:25p ET','CBS'],['Las Vegas Raiders at New Orleans Saints','Sun','4:25p ET','CBS'],['Los Angeles Rams at Denver Broncos','Sun','8:20p ET','NBC'],['Philadelphia Eagles at Chicago Bears','Mon','8:15p ET','ESPN/ABC']]},
+{week:4,start:'2026-10-01T20:15:00-04:00',range:'Oct 1-5, 2026',games:[['Pittsburgh Steelers at Cleveland Browns','Thu','8:15p ET','AMZ'],['Indianapolis Colts vs Washington Commanders (Tottenham)','Sun','9:30a ET','NFLN'],['Tennessee Titans at Baltimore Ravens','Sun','1:00p ET','CBS'],['New England Patriots at Buffalo Bills','Sun','1:00p ET','CBS'],['New York Jets at Chicago Bears','Sun','1:00p ET','FOX'],['Jacksonville Jaguars at Cincinnati Bengals','Sun','1:00p ET','CBS'],['Dallas Cowboys at Houston Texans','Sun','1:00p ET','FOX'],['Arizona Cardinals at New York Giants','Sun','1:00p ET','CBS'],['Los Angeles Rams at Philadelphia Eagles','Sun','1:00p ET','FOX'],['Green Bay Packers at Tampa Bay Buccaneers','Sun','1:00p ET','FOX'],['Miami Dolphins at Minnesota Vikings','Sun','4:05p ET','FOX'],['Kansas City Chiefs at Las Vegas Raiders','Sun','4:25p ET','CBS'],['Los Angeles Chargers at Seattle Seahawks','Sun','4:25p ET','CBS'],['Denver Broncos at San Francisco 49ers','Sun','4:25p ET','CBS'],['Detroit Lions at Carolina Panthers','Sun','8:20p ET','NBC'],['Atlanta Falcons at New Orleans Saints','Mon','8:15p ET','ESPN']]},
+{week:5,start:'2026-10-08T20:15:00-04:00',range:'Oct 8-12, 2026',games:[['Tampa Bay Buccaneers at Dallas Cowboys','Thu','8:15p ET','AMZ'],['Philadelphia Eagles vs Jacksonville Jaguars (Tottenham)','Sun','9:30a ET','NFLN'],['Cincinnati Bengals at Miami Dolphins','Sun','1:00p ET','FOX'],['Las Vegas Raiders at New England Patriots','Sun','1:00p ET','CBS'],['Minnesota Vikings at New Orleans Saints','Sun','1:00p ET','FOX'],['Cleveland Browns at New York Jets','Sun','1:00p ET','CBS'],['Indianapolis Colts at Pittsburgh Steelers','Sun','1:00p ET','CBS'],['Houston Texans at Tennessee Titans','Sun','1:00p ET','CBS'],['New York Giants at Washington Commanders','Sun','1:00p ET','FOX'],['Denver Broncos at Los Angeles Chargers','Sun','4:05p ET','CBS'],['Detroit Lions at Arizona Cardinals','Sun','4:25p ET','FOX'],['Chicago Bears at Green Bay Packers','Sun','4:25p ET','FOX'],['San Francisco 49ers at Seattle Seahawks','Sun','4:25p ET','FOX'],['Baltimore Ravens at Atlanta Falcons','Sun','8:20p ET','NBC*'],['Buffalo Bills at Los Angeles Rams','Mon','8:15p ET','ESPN/ABC']]},
+{week:6,start:'2026-10-15T20:15:00-04:00',range:'Oct 15-19, 2026',games:[['Seattle Seahawks at Denver Broncos','Thu','8:15p ET','AMZ'],['Houston Texans vs Jacksonville Jaguars (Wembley)','Sun','9:30a ET','NFLN'],['Chicago Bears at Atlanta Falcons','Sun','1:00p ET','FOX'],['Baltimore Ravens at Cleveland Browns','Sun','1:00p ET','FOX'],['Tennessee Titans at Indianapolis Colts','Sun','1:00p ET','FOX'],['New York Jets at New England Patriots','Sun','1:00p ET','CBS'],['New Orleans Saints at New York Giants','Sun','1:00p ET','FOX'],['Carolina Panthers at Philadelphia Eagles','Sun','1:00p ET','CBS'],['Pittsburgh Steelers at Tampa Bay Buccaneers','Sun','1:00p ET','CBS'],['Arizona Cardinals at Los Angeles Rams','Sun','4:05p ET','FOX'],['Los Angeles Chargers at Kansas City Chiefs','Sun','4:25p ET','CBS'],['Buffalo Bills at Las Vegas Raiders','Sun','4:25p ET','CBS'],['Dallas Cowboys at Green Bay Packers','Sun','8:20p ET','NBC*'],['Washington Commanders at San Francisco 49ers','Mon','8:15p ET','ESPN/ABC']]},
+{week:7,start:'2026-10-22T20:15:00-04:00',range:'Oct 22-26, 2026',games:[['New England Patriots at Chicago Bears','Thu','8:15p ET','AMZ'],['Pittsburgh Steelers vs New Orleans Saints (Paris)','Sun','9:30a ET','NFLN'],['San Francisco 49ers at Atlanta Falcons','Sun','1:00p ET','FOX'],['Cincinnati Bengals at Baltimore Ravens','Sun','1:00p ET','CBS'],['Tampa Bay Buccaneers at Carolina Panthers','Sun','1:00p ET','FOX'],['New York Giants at Houston Texans','Sun','1:00p ET','FOX'],['Indianapolis Colts at Minnesota Vikings','Sun','1:00p ET','CBS'],['Miami Dolphins at New York Jets','Sun','1:00p ET','CBS'],['Cleveland Browns at Tennessee Titans','Sun','1:00p ET','CBS'],['Denver Broncos at Arizona Cardinals','Sun','4:05p ET','CBS'],['Green Bay Packers at Detroit Lions','Sun','4:25p ET','FOX'],['Los Angeles Rams at Las Vegas Raiders','Sun','4:25p ET','FOX'],['Kansas City Chiefs at Seattle Seahawks','Sun','8:20p ET','NBC*'],['Dallas Cowboys at Philadelphia Eagles','Mon','8:15p ET','ESPN/ABC']]},
+{week:8,start:'2026-10-29T20:15:00-04:00',range:'Oct 29-Nov 2, 2026',games:[['Carolina Panthers at Green Bay Packers','Thu','8:15p ET','AMZ'],['Baltimore Ravens at Buffalo Bills','Sun','1:00p ET','CBS'],['Tennessee Titans at Cincinnati Bengals','Sun','1:00p ET','CBS'],['Arizona Cardinals at Dallas Cowboys','Sun','1:00p ET','FOX'],['Minnesota Vikings at Detroit Lions','Sun','1:00p ET','FOX'],['Indianapolis Colts at Jacksonville Jaguars','Sun','1:00p ET','CBS'],['Las Vegas Raiders at New York Jets','Sun','1:00p ET','FOX'],['Cleveland Browns at Pittsburgh Steelers','Sun','1:00p ET','CBS'],['Atlanta Falcons at Tampa Bay Buccaneers','Sun','1:00p ET','FOX'],['Los Angeles Chargers at Los Angeles Rams','Sun','4:05p ET','FOX'],['Kansas City Chiefs at Denver Broncos','Sun','4:25p ET','CBS'],['New England Patriots at Miami Dolphins','Sun','4:25p ET','CBS'],['Philadelphia Eagles at Washington Commanders','Sun','8:20p ET','NBC*'],['Chicago Bears at Seattle Seahawks','Mon','8:15p ET','ESPN']]},
+{week:9,start:'2026-11-05T20:15:00-05:00',range:'Nov 5-9, 2026',games:[['Jacksonville Jaguars at Baltimore Ravens','Thu','8:15p ET','AMZ'],['Cincinnati Bengals vs Atlanta Falcons (Madrid)','Sun','9:30a ET','NFLN'],['Denver Broncos at Carolina Panthers','Sun','1:00p ET','CBS'],['Dallas Cowboys at Indianapolis Colts','Sun','1:00p ET','FOX'],['New York Jets at Kansas City Chiefs','Sun','1:00p ET','CBS'],['Detroit Lions at Miami Dolphins','Sun','1:00p ET','FOX'],['Cleveland Browns at New Orleans Saints','Sun','1:00p ET','CBS'],['New York Giants at Philadelphia Eagles','Sun','1:00p ET','FOX'],['Los Angeles Rams at Washington Commanders','Sun','1:00p ET','FOX'],['Houston Texans at Los Angeles Chargers','Sun','4:05p ET','CBS'],['Las Vegas Raiders at San Francisco 49ers','Sun','4:05p ET','CBS'],['Green Bay Packers at New England Patriots','Sun','4:25p ET','FOX'],['Arizona Cardinals at Seattle Seahawks','Sun','4:25p ET','FOX'],['Tampa Bay Buccaneers at Chicago Bears','Sun','8:20p ET','NBC*'],['Buffalo Bills at Minnesota Vikings','Mon','8:15p ET','ESPN/ABC']]},
+{week:10,start:'2026-11-12T20:15:00-05:00',range:'Nov 12-16, 2026',games:[['Washington Commanders at New York Giants','Thu','8:15p ET','AMZ'],['New England Patriots vs Detroit Lions (Munich)','Sun','9:30a ET','FOX'],['Kansas City Chiefs at Atlanta Falcons','Sun','1:00p ET','CBS'],['Houston Texans at Cleveland Browns','Sun','1:00p ET','FOX'],['Minnesota Vikings at Green Bay Packers','Sun','1:00p ET','FOX'],['Miami Dolphins at Indianapolis Colts','Sun','1:00p ET','CBS'],['Carolina Panthers at New Orleans Saints','Sun','1:00p ET','FOX'],['Buffalo Bills at New York Jets','Sun','1:00p ET','CBS'],['Jacksonville Jaguars at Tennessee Titans','Sun','1:00p ET','FOX'],['Los Angeles Rams at Arizona Cardinals','Sun','4:05p ET','CBS'],['Seattle Seahawks at Las Vegas Raiders','Sun','4:05p ET','CBS'],['San Francisco 49ers at Dallas Cowboys','Sun','4:25p ET','FOX'],['Pittsburgh Steelers at Cincinnati Bengals','Sun','8:20p ET','NBC*'],['Los Angeles Chargers at Baltimore Ravens','Mon','8:15p ET','ESPN']]},
+{week:11,start:'2026-11-19T20:15:00-05:00',range:'Nov 19-23, 2026',games:[['Indianapolis Colts at Houston Texans','Thu','8:15p ET','AMZ'],['Miami Dolphins at Buffalo Bills','Sun','1:00p ET','FOX'],['Baltimore Ravens at Carolina Panthers','Sun','1:00p ET','FOX'],['New Orleans Saints at Chicago Bears','Sun','1:00p ET','FOX'],['Tennessee Titans at Dallas Cowboys','Sun','1:00p ET','FOX'],['Tampa Bay Buccaneers at Detroit Lions','Sun','1:00p ET','CBS'],['Arizona Cardinals at Kansas City Chiefs','Sun','1:00p ET','CBS'],['Jacksonville Jaguars at New York Giants','Sun','1:00p ET','CBS'],['New York Jets at Los Angeles Chargers','Sun','4:05p ET','FOX'],['Las Vegas Raiders at Denver Broncos','Sun','4:25p ET','CBS'],['Pittsburgh Steelers at Philadelphia Eagles','Sun','4:25p ET','CBS'],['Minnesota Vikings vs San Francisco 49ers (Mexico City)','Sun','8:20p ET','NBC'],['Cincinnati Bengals at Washington Commanders','Mon','8:15p ET','ESPN']]},
+{week:12,start:'2026-11-25T20:00:00-05:00',range:'Nov 25-30, 2026',games:[['Green Bay Packers at Los Angeles Rams','Wed','8:00p ET','Netflix'],['Chicago Bears at Detroit Lions','Thu','1:00p ET','CBS'],['Philadelphia Eagles at Dallas Cowboys','Thu','4:30p ET','FOX'],['Kansas City Chiefs at Buffalo Bills (Thanksgiving)','Thu','8:20p ET','NBC'],['Denver Broncos at Pittsburgh Steelers','Fri','3:00p ET','AMZ'],['New Orleans Saints at Cincinnati Bengals','Sun','1:00p ET','CBS'],['Las Vegas Raiders at Cleveland Browns','Sun','1:00p ET','FOX'],['Baltimore Ravens at Houston Texans','Sun','1:00p ET','CBS'],['New York Giants at Indianapolis Colts','Sun','1:00p ET','FOX'],['New York Jets at Miami Dolphins','Sun','1:00p ET','CBS'],['Atlanta Falcons at Minnesota Vikings','Sun','1:00p ET','FOX'],['Tennessee Titans at Jacksonville Jaguars','Sun','4:05p ET','CBS'],['Washington Commanders at Arizona Cardinals','Sun','4:25p ET','FOX'],['Seattle Seahawks at San Francisco 49ers','Sun','4:25p ET','FOX'],['New England Patriots at Los Angeles Chargers','Sun','8:20p ET','NBC*'],['Carolina Panthers at Tampa Bay Buccaneers','Mon','8:15p ET','ESPN*']]},
+{week:13,start:'2026-12-03T20:15:00-05:00',range:'Dec 3-7, 2026',games:[['Kansas City Chiefs at Los Angeles Rams','Thu','8:15p ET','AMZ*'],['Detroit Lions at Atlanta Falcons','Sun','1:00p ET','CBS'],['Jacksonville Jaguars at Chicago Bears','Sun','1:00p ET','FOX'],['Cincinnati Bengals at Cleveland Browns','Sun','1:00p ET','CBS'],['Green Bay Packers at New Orleans Saints','Sun','1:00p ET','FOX'],['San Francisco 49ers at New York Giants','Sun','1:00p ET','FOX'],['Los Angeles Chargers at Tampa Bay Buccaneers','Sun','1:00p ET','CBS'],['Washington Commanders at Tennessee Titans','Sun','1:00p ET','CBS'],['Philadelphia Eagles at Arizona Cardinals','Sun','4:05p ET','FOX'],['Miami Dolphins at Denver Broncos','Sun','4:05p ET','FOX'],['Carolina Panthers at Minnesota Vikings','Sun','4:25p ET','CBS'],['Buffalo Bills at New England Patriots','Sun','4:25p ET','CBS'],['Houston Texans at Pittsburgh Steelers','Sun','8:20p ET','NBC*'],['Dallas Cowboys at Seattle Seahawks','Mon','8:15p ET','ESPN/ABC*']]},
+{week:14,start:'2026-12-10T20:15:00-05:00',range:'Dec 10-14, 2026',games:[['Minnesota Vikings at New England Patriots','Thu','8:15p ET','AMZ*'],['Tampa Bay Buccaneers at Baltimore Ravens','Sun','1:00p ET','FOX'],['New Orleans Saints at Carolina Panthers','Sun','1:00p ET','CBS'],['Atlanta Falcons at Cleveland Browns','Sun','1:00p ET','CBS'],['Tennessee Titans at Detroit Lions','Sun','1:00p ET','FOX'],['Chicago Bears at Miami Dolphins','Sun','1:00p ET','CBS'],['Denver Broncos at New York Jets','Sun','1:00p ET','CBS'],['Indianapolis Colts at Philadelphia Eagles','Sun','1:00p ET','FOX'],['Houston Texans at Washington Commanders','Sun','1:00p ET','CBS'],['Los Angeles Chargers at Las Vegas Raiders','Sun','4:05p ET','CBS'],['Kansas City Chiefs at Cincinnati Bengals','Sun','4:25p ET','FOX'],['New York Giants at Seattle Seahawks','Sun','4:25p ET','FOX'],['Los Angeles Rams at San Francisco 49ers','Sun','4:25p ET','FOX'],['Buffalo Bills at Green Bay Packers','Sun','8:20p ET','NBC*'],['Pittsburgh Steelers at Jacksonville Jaguars','Mon','8:15p ET','ESPN*']]},
+{week:15,start:'2026-12-17T20:15:00-05:00',range:'Dec 17-21, 2026',games:[['San Francisco 49ers at Los Angeles Chargers','Thu','8:15p ET','AMZ*'],['Seattle Seahawks at Philadelphia Eagles','Sat','5:00p ET','FOX'],['Chicago Bears at Buffalo Bills','Sat','8:20p ET','CBS'],['Cincinnati Bengals at Carolina Panthers','Sun','1:00p ET','FOX'],['Miami Dolphins at Green Bay Packers','Sun','1:00p ET','FOX'],['Jacksonville Jaguars at Houston Texans','Sun','1:00p ET','CBS'],['Cleveland Browns at New York Giants','Sun','1:00p ET','CBS'],['Baltimore Ravens at Pittsburgh Steelers','Sun','1:00p ET','CBS'],['New Orleans Saints at Tampa Bay Buccaneers','Sun','1:00p ET','FOX'],['Indianapolis Colts at Tennessee Titans','Sun','1:00p ET','CBS'],['Atlanta Falcons at Washington Commanders','Sun','1:00p ET','FOX'],['New York Jets at Arizona Cardinals','Sun','4:05p ET','FOX'],['Dallas Cowboys at Los Angeles Rams','Sun','4:25p ET','CBS'],['Denver Broncos at Las Vegas Raiders','Sun','4:25p ET','CBS'],['Detroit Lions at Minnesota Vikings','Sun','8:20p ET','NBC*'],['New England Patriots at Kansas City Chiefs','Mon','8:15p ET','ESPN/ABC*']]},
+{week:16,start:'2026-12-24T20:15:00-05:00',range:'Dec 24-28, 2026',games:[['Houston Texans at Philadelphia Eagles','Thu','8:15p ET','AMZ*'],['Green Bay Packers at Chicago Bears','Fri','1:00p ET','NETFLIX'],['Buffalo Bills at Denver Broncos','Fri','4:30p ET','NETFLIX'],['Los Angeles Rams at Seattle Seahawks','Fri','8:15p ET','FOX'],['TBD game','Sat','4:30p ET','NFLN'],['TBD game','Sat','8:00p ET','NFLN'],['Tampa Bay Buccaneers at Atlanta Falcons','TBD','TBD','TBD'],['Cincinnati Bengals at Indianapolis Colts','TBD','TBD','TBD'],['Washington Commanders at Minnesota Vikings','TBD','TBD','TBD'],['Carolina Panthers at Pittsburgh Steelers','TBD','TBD','TBD'],['Cleveland Browns at Baltimore Ravens','Sun','1:00p ET','CBS'],['Los Angeles Chargers at Miami Dolphins','Sun','1:00p ET','FOX'],['Arizona Cardinals at New Orleans Saints','Sun','1:00p ET','FOX'],['New England Patriots at New York Jets','Sun','1:00p ET','CBS'],['Tennessee Titans at Las Vegas Raiders','Sun','4:05p ET','FOX'],['San Francisco 49ers at Kansas City Chiefs','Sun','4:25p ET','CBS'],['Jacksonville Jaguars at Dallas Cowboys','Sun','8:20p ET','NBC*'],['New York Giants at Detroit Lions','Mon','8:15p ET','ESPN*']]},
+{week:17,start:'2026-12-31T20:15:00-05:00',range:'Dec 31, 2026-Jan 4, 2027',games:[['Baltimore Ravens at Cincinnati Bengals','Thu','8:15p ET','AMZ*'],['TBD game','Sat','4:30p ET','NBC'],['TBD game','Sat','8:00p ET','Peacock'],['Washington Commanders at Jacksonville Jaguars','TBD','TBD','TBD'],['Kansas City Chiefs at Los Angeles Chargers','TBD','TBD','TBD'],['Denver Broncos at New England Patriots','TBD','TBD','TBD'],['Los Angeles Rams at Tampa Bay Buccaneers','TBD','TBD','TBD'],['New Orleans Saints at Atlanta Falcons','Sun','1:00p ET','FOX'],['Seattle Seahawks at Carolina Panthers','Sun','1:00p ET','FOX'],['Indianapolis Colts at Cleveland Browns','Sun','1:00p ET','FOX'],['New York Giants at Dallas Cowboys','Sun','1:00p ET','FOX'],['Buffalo Bills at Miami Dolphins','Sun','1:00p ET','CBS'],['Minnesota Vikings at New York Jets','Sun','1:00p ET','CBS'],['Pittsburgh Steelers at Tennessee Titans','Sun','1:00p ET','CBS'],['Las Vegas Raiders at Arizona Cardinals','Sun','4:05p ET','CBS'],['Detroit Lions at Chicago Bears','Sun','4:25p ET','FOX'],['Philadelphia Eagles at San Francisco 49ers','Sun','8:20p ET','NBC*'],['Houston Texans at Green Bay Packers','Mon','8:15p ET','ESPN*']]},
+{week:18,start:'2027-01-09T13:00:00-05:00',range:'Jan 9-10, 2027',games:[['San Francisco 49ers at Arizona Cardinals','TBD','TBD','TBD'],['Pittsburgh Steelers at Baltimore Ravens','TBD','TBD','TBD'],['New York Jets at Buffalo Bills','TBD','TBD','TBD'],['Atlanta Falcons at Carolina Panthers','TBD','TBD','TBD'],['Cleveland Browns at Cincinnati Bengals','TBD','TBD','TBD'],['Los Angeles Chargers at Denver Broncos','TBD','TBD','TBD'],['Detroit Lions at Green Bay Packers','TBD','TBD','TBD'],['Tennessee Titans at Houston Texans','TBD','TBD','TBD'],['Jacksonville Jaguars at Indianapolis Colts','TBD','TBD','TBD'],['Las Vegas Raiders at Kansas City Chiefs','TBD','TBD','TBD'],['Seattle Seahawks at Los Angeles Rams','TBD','TBD','TBD'],['Chicago Bears at Minnesota Vikings','TBD','TBD','TBD'],['Miami Dolphins at New England Patriots','TBD','TBD','TBD'],['Tampa Bay Buccaneers at New Orleans Saints','TBD','TBD','TBD'],['Philadelphia Eagles at New York Giants','TBD','TBD','TBD'],['Dallas Cowboys at Washington Commanders','TBD','TBD','TBD']]}];
+const completedScores = {
+'New England Patriots at Seattle Seahawks':[10,13],
+'San Francisco 49ers vs Los Angeles Rams (Melbourne)':[27,7],
+'Chicago Bears at Carolina Panthers':[59,37],
+'Tampa Bay Buccaneers at Cincinnati Bengals':[27,33],
+'New Orleans Saints at Detroit Lions':[30,31],
+'Buffalo Bills at Houston Texans':[36,31],
+'Baltimore Ravens at Indianapolis Colts':[41,23],
+'Cleveland Browns at Jacksonville Jaguars':[10,34],
+'Atlanta Falcons at Pittsburgh Steelers':[13,20],
+'New York Jets at Tennessee Titans':[23,10],
+'Arizona Cardinals at Los Angeles Chargers':[26,14],
+'Miami Dolphins at Las Vegas Raiders':[13,27],
+'Green Bay Packers at Minnesota Vikings':[22,39],
+'Washington Commanders at Philadelphia Eagles':[22,24],
+'Dallas Cowboys at New York Giants':[20,28],
+'Denver Broncos at Kansas City Chiefs':[10,31],
+'Detroit Lions at Buffalo Bills':[31,41],
+'Carolina Panthers at Atlanta Falcons':[34,3],
+'New Orleans Saints at Baltimore Ravens':[24,17],
+'Minnesota Vikings at Chicago Bears':[9,3],
+'Cincinnati Bengals at Houston Texans':[20,6],
+'Pittsburgh Steelers at New England Patriots':[3,20],
+'Green Bay Packers at New York Jets':[20,17],
+'Cleveland Browns at Tampa Bay Buccaneers':[23,19],
+'Philadelphia Eagles at Tennessee Titans':[24,20],
+'Jacksonville Jaguars at Denver Broncos':[13,20],
+'Las Vegas Raiders at Los Angeles Chargers':[26,14],
+'Seattle Seahawks at Arizona Cardinals':[31,7],
+'Washington Commanders at Dallas Cowboys':[20,37],
+'Miami Dolphins at San Francisco 49ers':[13,35],
+'Indianapolis Colts at Kansas City Chiefs':[30,33],
+'New York Giants at Los Angeles Rams':[6,28],
+'Atlanta Falcons at Green Bay Packers':[35,14],
+'Los Angeles Chargers at Buffalo Bills':[16,24],
+'Carolina Panthers at Cleveland Browns':[18,21],
+'New York Jets at Detroit Lions':[24,31],
+'Houston Texans at Indianapolis Colts':[17,19],
+'New England Patriots at Jacksonville Jaguars':[6,35],
+'Kansas City Chiefs at Miami Dolphins':[24,10],
+'Tennessee Titans at New York Giants':[7,12],
+'Cincinnati Bengals at Pittsburgh Steelers':[27,30],
+'Seattle Seahawks at Washington Commanders':[31,33],
+'Arizona Cardinals at San Francisco 49ers':[30,36],
+'Minnesota Vikings at Tampa Bay Buccaneers':[23,16],
+'Baltimore Ravens vs Dallas Cowboys (Rio de Janeiro)':[34,31],
+'Las Vegas Raiders at New Orleans Saints':[35,27],
+'Los Angeles Rams at Denver Broncos':[26,30],
+'Philadelphia Eagles at Chicago Bears':[7,27],
+'Pittsburgh Steelers at Cleveland Browns':[24,27]
+};
+function scoreFor(g){return completedScores[g[0]]||null;}
+function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
+function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
+const dashboardMeta = {
+  version: '34.9',
+  label: 'Live NFL + Fantasy Impact Edition',
+  updatedThrough: 'Week 4 - Thursday Night Football',
+  currentWeekLabel: 'Week 4',
+  lastUpdated: 'October 4, 2026 • Countdown now uses true Eastern kickoff instant',
+  maintainedBy: 'Kenny Landry',
+  completedGames: 48
+};
+let currentWeek=3;
+const $=id=>document.getElementById(id);
+const fmt=n=>String(n).padStart(2,'0');
+const teamAliases={
+  'steelers':['pittsburgh steelers','pittsburgh','steelers'], 'patriots':['new england patriots','new england','patriots'], 'seahawks':['seattle seahawks','seattle','seahawks'], 'rams':['los angeles rams','la rams','rams'], '49ers':['san francisco 49ers','san francisco','niners','49ers'], 'bears':['chicago bears','chicago','bears'], 'panthers':['carolina panthers','carolina','panthers'], 'buccaneers':['tampa bay buccaneers','tampa bay','bucs','buccaneers'], 'bengals':['cincinnati bengals','cincinnati','bengals'], 'saints':['new orleans saints','new orleans','saints'], 'lions':['detroit lions','detroit','lions'], 'bills':['buffalo bills','buffalo','bills'], 'texans':['houston texans','houston','texans'], 'ravens':['baltimore ravens','baltimore','ravens'], 'colts':['indianapolis colts','indianapolis','colts'], 'browns':['cleveland browns','cleveland','browns'], 'jaguars':['jacksonville jaguars','jacksonville','jags','jaguars'], 'falcons':['atlanta falcons','atlanta','falcons'], 'jets':['new york jets','ny jets','jets'], 'titans':['tennessee titans','tennessee','titans'], 'cardinals':['arizona cardinals','arizona','cardinals'], 'chargers':['los angeles chargers','la chargers','chargers'], 'dolphins':['miami dolphins','miami','dolphins'], 'raiders':['las vegas raiders','las vegas','raiders'], 'packers':['green bay packers','green bay','packers'], 'vikings':['minnesota vikings','minnesota','vikings'], 'commanders':['washington commanders','washington','commanders'], 'eagles':['philadelphia eagles','philadelphia','eagles'], 'cowboys':['dallas cowboys','dallas','cowboys'], 'giants':['new york giants','ny giants','giants'], 'broncos':['denver broncos','denver','broncos'], 'chiefs':['kansas city chiefs','kansas city','chiefs']
+};
+
+const teamDivisions={
+  bills:'AFC East', dolphins:'AFC East', patriots:'AFC East', jets:'AFC East',
+  ravens:'AFC North', bengals:'AFC North', browns:'AFC North', steelers:'AFC North',
+  texans:'AFC South', colts:'AFC South', jaguars:'AFC South', titans:'AFC South',
+  broncos:'AFC West', chiefs:'AFC West', raiders:'AFC West', chargers:'AFC West',
+  cowboys:'NFC East', giants:'NFC East', eagles:'NFC East', commanders:'NFC East',
+  bears:'NFC North', lions:'NFC North', packers:'NFC North', vikings:'NFC North',
+  falcons:'NFC South', panthers:'NFC South', saints:'NFC South', buccaneers:'NFC South',
+  cardinals:'NFC West', rams:'NFC West', '49ers':'NFC West', seahawks:'NFC West'
+};
+
+const teamDarkThemes={
+  steelers:['#090909','#201700','#141414','#241b05','#fff8e6','#d5c797','#ffb612','#f5d06f','#5a4306','#101010','#1a1a1a','#101010','#ffb612','#111111'],
+  titans:['#071521','#0c2340','#0b1b2a','#102a44','#f4fbff','#a7bed3','#4b92db','#9bd0ff','#244e78','#081724','#0f2438','#0a1825','#4b92db','#ffffff'],
+  cowboys:['#080d13','#0c2340','#111820','#1b2430','#f6f8fb','#b7c0ca','#b0b7bc','#d7dde2','#3b4652','#0d141b','#151d26','#0e151d','#b0b7bc','#07101a'],
+  ravens:['#09070f','#24125f','#12101a','#1b1438','#fbf8ff','#c8bbdd','#9e7c0c','#d7b74a','#46356a','#0d0b14','#171225','#0e0b15','#9e7c0c','#ffffff'],
+  bengals:['#0b0b0b','#321100','#15110f','#241309','#fff7f0','#d4b9a2','#fb4f14','#ffb08a','#5c2911','#100d0b','#1b120d','#100d0b','#fb4f14','#ffffff'],
+  browns:['#0d0804','#2b1508','#17100b','#26160d','#fff8f2','#d0b8a8','#ff3c00','#ffb08c','#5c2a15','#110b07','#1d120b','#110b07','#ff3c00','#ffffff'],
+  bills:['#07101f','#00338d','#0b1728','#102444','#f5f9ff','#abc0d8','#c60c30','#ff8ca2','#27466f','#081424','#10203a','#091523','#c60c30','#ffffff'],
+  dolphins:['#021819','#004c54','#082324','#0a3335','#efffff','#a8d2d3','#fc4c02','#ffad7d','#1f666a','#051a1b','#0a292a','#061b1c','#fc4c02','#ffffff'],
+  patriots:['#070d18','#002244','#0b1422','#142035','#f6f9ff','#aebdd1','#c60c30','#ff91a5','#243b5f','#08111d','#101b2c','#09121e','#c60c30','#ffffff'],
+  jets:['#04110c','#0b2b1d','#0a1812','#10281c','#f3fff9','#a6c7b8','#67c29a','#9be0bf','#245344','#07140f','#0e2118','#07140f','#67c29a','#06120d'],
+  texans:['#050b12','#071a26','#0b141d','#101d2a','#f5f9ff','#abb8c6','#a71930','#e45f74','#263d52','#080f16','#111b25','#080f16','#e45f74','#ffffff'],
+  colts:['#06101c','#002c5f','#0b1725','#10253d','#f6fbff','#aec2d7','#5aa6ff','#a7d4ff','#244d79','#081423','#10223a','#081423','#5aa6ff','#06101c'],
+  jaguars:['#041416','#006778','#071d20','#0b2b2f','#f1ffff','#a5cfd2','#d7a22a','#f7d37a','#27616a','#061719','#0b2528','#061719','#d7a22a','#081012'],
+  broncos:['#070f1d','#002244','#0b1625','#10213a','#f7fbff','#adbed2','#fb4f14','#ffab82','#263f64','#081321','#101f34','#081321','#fb4f14','#ffffff'],
+  chiefs:['#08080a','#17110b','#111113','#1d1710','#fffaf0','#d8c7a5','#ffb81c','#ffe08a','#4f3a14','#0d0d0f','#181512','#0d0d0f','#ffb81c','#111111'],
+  raiders:['#070809','#1c2024','#111315','#1b1f23','#f4f5f6','#b9bec4','#a5acaf','#e0e4e6','#3c4248','#0b0d0f','#171a1d','#0b0d0f','#a5acaf','#060708'],
+  chargers:['#06121d','#0b3b60','#0a1b2b','#102c45','#f3fbff','#a9c4d8','#ffc20e','#ffe282','#25597b','#081624','#10263c','#081624','#ffc20e','#08121d'],
+  eagles:['#021213','#004c54','#071b1d','#0b2a2d','#f2ffff','#a9ced0','#a5acaf','#e1e6e8','#245b60','#061617','#0c2527','#061617','#a5acaf','#061214'],
+  giants:['#071122','#0b2265','#0c1728','#132449','#f7faff','#b0bfd6','#a71930','#f08397','#2c477c','#091321','#111f37','#091321','#a71930','#ffffff'],
+  commanders:['#100507','#3b111b','#1a0c10','#2a1218','#fff8f3','#d6b9a4','#ffb612','#ffe08a','#65333b','#12080b','#211014','#12080b','#ffb612','#111111'],
+  packers:['#03110d','#203731','#0a1915','#122720','#f5fff9','#aec8bb','#ffb612','#ffe08a','#305b4f','#071410','#10221b','#071410','#ffb612','#111111'],
+  vikings:['#0b0613','#2b125a','#120d1b','#1e1733','#fcf9ff','#c8bdd8','#ffc62f','#ffe48d','#49366b','#0d0914','#191224','#0d0914','#ffc62f','#111111'],
+  bears:['#050c14','#0b162a','#0b131f','#151f31','#f8fbff','#b1bdcc','#c83803','#ff8f66','#303b4f','#080f18','#111a29','#080f18','#c83803','#ffffff'],
+  lions:['#06131d','#0c2b43','#0a1b28','#102a3f','#f5fbff','#adc6d8','#b0b7bc','#e1e6e8','#2b536f','#081722','#102537','#081722','#b0b7bc','#06101a'],
+  falcons:['#08080a','#1a0d11','#121115','#201418','#fff7f8','#cdb8bd','#a71930','#e75d75','#4a2d35','#0d0c0f','#181316','#0d0c0f','#e75d75','#ffffff'],
+  panthers:['#050a0f','#061c2b','#0b1218','#0f2230','#f4fbff','#aec0cd','#0085ca','#79c9ff','#263f51','#080f14','#111d26','#080f14','#0085ca','#ffffff'],
+  saints:['#080705','#211a0c','#12100c','#1d180f','#fffaf0','#cabe9e','#d3bc8d','#f2dfad','#4b4127','#0d0b08','#19150e','#0d0b08','#d3bc8d','#111111'],
+  buccaneers:['#0b0708','#2b0d11','#151010','#231416','#fff7f5','#d0b8b1','#d50a0a','#ff8a8a','#5b3030','#100b0b','#1d1213','#100b0b','#d50a0a','#ffffff'],
+  cardinals:['#08080a','#201018','#121114','#21151a','#fff8fb','#d1bbc3','#97233f','#d96e88','#52323d','#0f0c0f','#1a1418','#0f0c0f','#d96e88','#ffffff'],
+  rams:['#061326','#003594','#0b1830','#102a56','#f6faff','#b0c2dc','#ffd100','#ffe87d','#294d87','#081427','#102448','#081427','#ffd100','#061326'],
+  seahawks:['#061018','#002244','#0b1721','#102335','#f5fbff','#adc0cf','#69be28','#b8f080','#274863','#08131c','#102032','#08131c','#69be28','#071018'],
+  '49ers':['#080808','#1d1710','#111111','#201a13','#fff8ed','#d5c29d','#aa0000','#d9b66a','#4f351a','#0e0e0e','#181614','#0e0e0e','#d9b66a','#ffffff']
+};
+
+const teamLightThemes={
+  steelers:['#111111','#ffb612','#ffffff','#3d3005','rgba(255,182,18,.28)'], titans:['#0c2340','#4b92db','#ffffff','#b9c7d6','rgba(75,146,219,.30)'], cowboys:['#041e42','#869397','#ffffff','#b8c0ca','rgba(4,30,66,.22)'], ravens:['#241773','#9e7c0c','#ffffff','#c7b5e8','rgba(36,23,115,.24)'], bengals:['#fb4f14','#111111','#111111','#f2b49d','rgba(251,79,20,.24)'], browns:['#311d00','#ff3c00','#ffffff','#caa783','rgba(255,60,0,.22)'], bills:['#00338d','#c60c30','#ffffff','#b8c8df','rgba(0,51,141,.24)'], dolphins:['#008e97','#fc4c02','#ffffff','#a8d4d7','rgba(0,142,151,.23)'], patriots:['#002244','#c60c30','#ffffff','#b5c2d1','rgba(0,34,68,.22)'], jets:['#125740','#000000','#ffffff','#b8d1c7','rgba(18,87,64,.24)'], texans:['#03202f','#a71930','#ffffff','#b5c2ca','rgba(3,32,47,.24)'], colts:['#002c5f','#a2aaad','#ffffff','#b8c7d8','rgba(0,44,95,.24)'], jaguars:['#006778','#d7a22a','#ffffff','#adcfd3','rgba(0,103,120,.24)'], broncos:['#002244','#fb4f14','#ffffff','#b8c7da','rgba(0,34,68,.24)'], chiefs:['#e31837','#ffb81c','#ffffff','#f0b6bf','rgba(227,24,55,.24)'], raiders:['#000000','#a5acaf','#ffffff','#c3c7ca','rgba(0,0,0,.22)'], chargers:['#0080c6','#ffc20e','#ffffff','#aad3eb','rgba(0,128,198,.24)'], eagles:['#004c54','#a5acaf','#ffffff','#b3ced1','rgba(0,76,84,.24)'], giants:['#0b2265','#a71930','#ffffff','#b9c6e1','rgba(11,34,101,.24)'], commanders:['#5a1414','#ffb612','#ffffff','#d6b3b3','rgba(90,20,20,.24)'], packers:['#203731','#ffb612','#ffffff','#b8cec5','rgba(32,55,49,.24)'], vikings:['#4f2683','#ffc62f','#ffffff','#cbb9df','rgba(79,38,131,.24)'], bears:['#0b162a','#c83803','#ffffff','#bac3d3','rgba(11,22,42,.24)'], lions:['#0076b6','#b0b7bc','#ffffff','#acd1e8','rgba(0,118,182,.24)'], falcons:['#a71930','#000000','#ffffff','#e1b0bb','rgba(167,25,48,.24)'], panthers:['#0085ca','#101820','#ffffff','#abd5ed','rgba(0,133,202,.24)'], saints:['#101820','#d3bc8d','#ffffff','#c6c8ca','rgba(16,24,32,.22)'], buccaneers:['#d50a0a','#34302b','#ffffff','#ebb1b1','rgba(213,10,10,.24)'], cardinals:['#97233f','#000000','#ffffff','#d9b2bd','rgba(151,35,63,.24)'], rams:['#003594','#ffd100','#ffffff','#b7c7ec','rgba(0,53,148,.24)'], seahawks:['#002244','#69be28','#ffffff','#b5c6d7','rgba(0,34,68,.24)'], '49ers':['#aa0000','#b3995d','#ffffff','#ddb3b3','rgba(170,0,0,.24)']
+};
+const darkVarNames=['bg','bg2','panel','panel2','text','muted','accent','accent2','border','field','tab','game','stripe','activeText'];
+
+function hexToRgb(hex){hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(x=>x+x).join(''); const n=parseInt(hex,16); return [(n>>16)&255,(n>>8)&255,n&255];}
+function rgbToHex(r,g,b){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');}
+function mixColor(a,b,t){const A=hexToRgb(a),B=hexToRgb(b); return rgbToHex(A[0]*(1-t)+B[0]*t,A[1]*(1-t)+B[1]*t,A[2]*(1-t)+B[2]*t);}
+function applyCommandTeamDarkPalette(){
+  const key=($('commandTeamSelect')&&$('commandTeamSelect').value)||localStorage.getItem('nflCommandTeam')||'steelers';
+  const vals=teamDarkThemes[key]||teamDarkThemes.steelers;
+  darkVarNames.forEach((name,i)=>document.documentElement.style.setProperty('--'+name,vals[i]));
+  const light=teamLightThemes[key]||teamLightThemes.steelers;
+  document.documentElement.style.setProperty('--lightTeamMain',light[0]);
+  document.documentElement.style.setProperty('--lightTeamComp',light[1]);
+  document.documentElement.style.setProperty('--lightActiveText',light[2]);
+  document.documentElement.style.setProperty('--lightBorder',light[3]);
+  document.documentElement.style.setProperty('--lightGlow',light[4]);
+  document.documentElement.style.setProperty('--lightTeamMain2',mixColor(light[0],'#111111',0.20));
+}
+function diffParts(iso){let diff=new Date(iso)-new Date(); if(diff<=0)return null; let s=Math.floor(diff/1000); let d=Math.floor(s/86400); s-=d*86400; let h=Math.floor(s/3600); s-=h*3600; let m=Math.floor(s/60); s-=m*60; return {d,h,m,s};}
+function cdText(iso){const p=diffParts(iso); return p?`${p.d}d ${p.h}h ${p.m}m`:'Started';}
+function cleanNet(n){return (n||'').replace(/\*/g,'').trim().toUpperCase();}
+function displayNet(n){const x=cleanNet(n);const map={AMZ:'Amazon Prime',NFLN:'NFL Network'};return map[x]||x.replace('ESPN/ABC','ESPN/ABC');}
+function gameText(g){return g.join(' ').toLowerCase();}
+function groupLabel(g){
+  const day=g[1], time=g[2];
+  if(day==='TBD') return 'TBD / Flexible Scheduling';
+  if(day==='Sun' && /9:30a|9:00a|8:30a/.test(time)) return 'Sunday Morning International';
+  if(day==='Sun' && /^1:/.test(time)) return 'Sunday 1300 Start Games';
+  if(day==='Sun' && /^4:/.test(time)) return 'Sunday 1600 Start Games';
+  if(day==='Sun' && /^8:/.test(time)) return 'Sunday Night Football';
+  if(day==='Mon') return 'Monday Night Football';
+  if(day==='Thu') return 'Thursday Game';
+  if(day==='Sat') return 'Saturday Games';
+  if(day==='Wed') return 'Wednesday Game';
+  if(day==='Fri') return 'Friday Games';
+  return `${day} Games`;
+}
+const groupOrder=['Wednesday Game','Thursday Game','Friday Games','Saturday Games','Sunday Morning International','Sunday 1300 Start Games','Sunday 1600 Start Games','Sunday Night Football','Monday Night Football','TBD / Flexible Scheduling'];
+function isPrimeOrSpecial(g){return ['Wednesday Game','Thursday Game','Friday Games','Saturday Games','Sunday Morning International','Sunday Night Football','Monday Night Football'].includes(groupLabel(g)) || /8:|NBC|ESPN|ABC|Prime|Netflix|Peacock/i.test((g[1]+' '+g[2]+' '+g[3]));}
+function teamAbbr(key){const map={steelers:'PIT',patriots:'NE',seahawks:'SEA',rams:'LAR','49ers':'SF',bears:'CHI',panthers:'CAR',buccaneers:'TB',bengals:'CIN',saints:'NO',lions:'DET',bills:'BUF',texans:'HOU',ravens:'BAL',colts:'IND',browns:'CLE',jaguars:'JAX',falcons:'ATL',jets:'NYJ',titans:'TEN',cardinals:'ARI',chargers:'LAC',dolphins:'MIA',raiders:'LV',packers:'GB',vikings:'MIN',commanders:'WAS',eagles:'PHI',cowboys:'DAL',giants:'NYG',broncos:'DEN',chiefs:'KC'};return map[key]||teamName(key).split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase();}
+function teamColors(key){const vals=teamDarkThemes[key]||teamDarkThemes.steelers;return {primary:vals[6],secondary:vals[7],text:vals[13]};}
+function teamPill(key,mini=false){const c=teamColors(key);return `<span class="teamPill ${mini?'teamPillMini':''}" style="background:linear-gradient(135deg,${c.primary},${c.secondary});color:${c.text}">${teamAbbr(key)}</span>`;}
+function teamsInGame(g){const txt=gameText(g);return Object.keys(teamAliases).filter(k=>teamAliases[k].some(a=>txt.includes(a))).slice(0,2);}
+function matchupWithBadges(g){const teams=teamsInGame(g);return `<div class="teamPills">${teams.map(k=>teamPill(k)).join('')}</div><div class="match">${g[0]}</div>`;}
+function homeAwayFor(key,g){const name=(teamAliases[key]&&teamAliases[key][0])||key;const raw=(g[0]||'').toLowerCase();if(raw.startsWith(name+' at ')) return 'Away'; if(raw.includes(' at '+name)) return 'Home'; if(raw.startsWith(name+' vs ')) return 'Neutral'; if(raw.includes(' vs '+name)) return 'Neutral'; return 'Game';}
+
+const homeTeamZones={
+  'Seattle Seahawks':'America/Los_Angeles','Los Angeles Rams':'America/Los_Angeles','San Francisco 49ers':'America/Los_Angeles','Las Vegas Raiders':'America/Los_Angeles','Los Angeles Chargers':'America/Los_Angeles',
+  'Arizona Cardinals':'America/Phoenix','Denver Broncos':'America/Denver',
+  'Kansas City Chiefs':'America/Chicago','Dallas Cowboys':'America/Chicago','Houston Texans':'America/Chicago','Chicago Bears':'America/Chicago','Green Bay Packers':'America/Chicago','Minnesota Vikings':'America/Chicago','New Orleans Saints':'America/Chicago','Tennessee Titans':'America/Chicago',
+  'New England Patriots':'America/New_York','Buffalo Bills':'America/New_York','New York Jets':'America/New_York','New York Giants':'America/New_York','Baltimore Ravens':'America/New_York','Pittsburgh Steelers':'America/New_York','Cleveland Browns':'America/New_York','Cincinnati Bengals':'America/New_York','Indianapolis Colts':'America/Indiana/Indianapolis','Jacksonville Jaguars':'America/New_York','Miami Dolphins':'America/New_York','Atlanta Falcons':'America/New_York','Carolina Panthers':'America/New_York','Tampa Bay Buccaneers':'America/New_York','Detroit Lions':'America/Detroit','Philadelphia Eagles':'America/New_York','Washington Commanders':'America/New_York'
+};
+function venueTimeZone(g){
+  const raw=g[0]||'';
+  if(/Melbourne/i.test(raw)) return {zone:'Australia/Melbourne',label:'Melbourne'};
+  if(/Rio de Janeiro/i.test(raw)) return {zone:'America/Sao_Paulo',label:'Rio'};
+  if(/Tottenham|Wembley/i.test(raw)) return {zone:'Europe/London',label:'London'};
+  if(/Paris/i.test(raw)) return {zone:'Europe/Paris',label:'Paris'};
+  if(/Madrid/i.test(raw)) return {zone:'Europe/Madrid',label:'Madrid'};
+  if(/Munich/i.test(raw)) return {zone:'Europe/Berlin',label:'Munich'};
+  if(/Mexico City/i.test(raw)) return {zone:'America/Mexico_City',label:'Mexico City'};
+  const m=raw.match(/ at ([^(]+?)(?: \(|$)/i);
+  const home=m?m[1].trim():'';
+  return {zone:homeTeamZones[home]||'America/New_York',label:home?home.split(' ').slice(-1)[0]:'Venue'};
+}
+function easternGameInstant(w,g){
+  if(g[1]==='TBD' || !/(\d{1,2}):(\d{2})(a|p)/i.test(g[2]||'')) return null;
+  const start=(w.start||'').slice(0,10).split('-').map(Number);
+  const [y,mo,da]=start;
+  const base=new Date(Date.UTC(y,mo-1,da));
+  const dayNums={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+  const target=dayNums[g[1]];
+  const offset=(target===undefined)?0:(target-base.getUTCDay()+7)%7;
+  const eventDate=new Date(Date.UTC(y,mo-1,da+offset));
+  const yy=eventDate.getUTCFullYear(), mm=String(eventDate.getUTCMonth()+1).padStart(2,'0'), dd=String(eventDate.getUTCDate()).padStart(2,'0');
+  const mt=(g[2]||'').match(/(\d{1,2}):(\d{2})(a|p)/i); let hr=+mt[1];
+  if(mt[3].toLowerCase()==='p' && hr!==12) hr+=12; if(mt[3].toLowerCase()==='a' && hr===12) hr=0;
+  const easternOffset=((yy===2026 && (eventDate.getUTCMonth()+1)<11))?'-04:00':'-05:00';
+  return new Date(`${yy}-${mm}-${dd}T${String(hr).padStart(2,'0')}:${mt[2]}:00${easternOffset}`);
+}
+function zoneTimeText(date,zone){
+  if(!date) return 'TBD';
+  return new Intl.DateTimeFormat('en-US',{timeZone:zone,weekday:'short',hour:'numeric',minute:'2-digit'}).format(date);
+}
+function gameTimesMarkup(w,g){
+  const dt=easternGameInstant(w,g); if(!dt) return '';
+  const local=venueTimeZone(g);
+  const zones=[
+    ['LOCAL',zoneTimeText(dt,local.zone)],
+    ['EST',zoneTimeText(dt,'America/New_York')],
+    ['CST',zoneTimeText(dt,'America/Chicago')],
+    ['MST',zoneTimeText(dt,'America/Denver')],
+    ['PST',zoneTimeText(dt,'America/Los_Angeles')]
+  ];
+  return `<div class="gameTimes" aria-label="Game times by time zone">${zones.map(([label,value])=>`<div class="gameTimeZone"><div class="tzLabel">${label}</div><div class="tzValue">${value}</div></div>`).join('')}</div>`;
+}
+
+function gameDateFromWeek(w,g){
+  const exact=easternGameInstant(w,g);
+  if(exact) return exact;
+  return new Date(w.start);
+}
+function weekFirstDate(w){return w.games.map(g=>gameDateFromWeek(w,g)).sort((a,b)=>a-b)[0] || new Date(w.start);}
+function weekCountdownParts(w){return diffParts(weekFirstDate(w).toISOString());}
+function weekCountdownText(w){const p=weekCountdownParts(w); return p?`${p.d}d ${p.h}h ${p.m}m`:'Started';}
+function allGamesDated(){return weeks.flatMap(w=>w.games.map(g=>({week:w.week,range:w.range,game:g,date:gameDateFromWeek(w,g)})));}
+function nextGame(filter){const now=new Date();return allGamesDated().filter(x=>!scoreFor(x.game) && x.date>now && (!filter || filter(x))).sort((a,b)=>a.date-b.date)[0] || null;}
+function countdownLong(date){let diff=date-new Date(); if(diff<=0)return 'Started'; let s=Math.floor(diff/1000),d=Math.floor(s/86400);s-=d*86400;let h=Math.floor(s/3600);s-=h*3600;let m=Math.floor(s/60);return `${d} Days • ${h} Hours • ${m} Minutes`;}
+function gameCountdownText(date){let diff=date-new Date(); if(diff<=0)return 'Kickoff / Final'; let s=Math.floor(diff/1000),d=Math.floor(s/86400);s-=d*86400;let h=Math.floor(s/3600);s-=h*3600;let m=Math.floor(s/60);return `${d}d ${h}h ${m}m`;}
+function gameCountdownMarkup(date,label='Kickoff Countdown'){return `<div class="gameCountdown"><span class="label">${label}</span><span class="value" data-game-countdown="${date.toISOString()}">${gameCountdownText(date)}</span></div>`;}
+function refreshGameCountdowns(){document.querySelectorAll('[data-game-countdown]').forEach(el=>{el.textContent=gameCountdownText(new Date(el.dataset.gameCountdown));});}
+function totalScheduledGames(){return weeks.reduce((sum,w)=>sum+w.games.length,0);}
+function renderDashboardStatus(){
+  const total=totalScheduledGames();
+  const done=dashboardMeta.completedGames||0;
+  const pct=total?Math.round((done/total)*100):0;
+  if($('statusHeadline')) $('statusHeadline').textContent=dashboardMeta.label;
+  if($('statusPill')) $('statusPill').textContent=`Version ${dashboardMeta.version}`;
+  if($('statusVersion')) $('statusVersion').textContent=dashboardMeta.version;
+  if($('statusUpdatedThrough')) $('statusUpdatedThrough').textContent=dashboardMeta.updatedThrough;
+  if($('statusCurrentWeek')) $('statusCurrentWeek').textContent=dashboardMeta.currentWeekLabel;
+  if($('statusGamesCompleted')) $('statusGamesCompleted').textContent=`${done} / ${total}`;
+  if($('seasonProgressBar')) $('seasonProgressBar').style.width=`${pct}%`;
+  if($('seasonProgressMeta')) $('seasonProgressMeta').textContent=`Season Progress: ${pct}% • ${done} of ${total} scheduled games completed`;
+  if($('footerVersion')) $('footerVersion').textContent=`Version ${dashboardMeta.version} – ${dashboardMeta.label}`;
+  if($('footerUpdatedThrough')) $('footerUpdatedThrough').textContent=`Updated Through: ${dashboardMeta.updatedThrough} • Current NFL Week: ${dashboardMeta.currentWeekLabel}`;
+  if($('footerLastUpdated')) $('footerLastUpdated').textContent=`Last Updated: ${dashboardMeta.lastUpdated}`;
+}
+function renderNextEvent(){
+  const live=window.__liveNFLHero;
+  if(live){
+    const label=$('nextEventLabel'), times=$('nextTimes');
+    if(label) label.textContent='NFL GAME IN PROGRESS';
+    $('nextMatch').textContent=live.awayName+' '+live.awayScore+' — '+live.homeScore+' '+live.homeName;
+    $('nextCountdown').textContent=live.status||'In Progress';
+    if(times) times.innerHTML='<div class="gameTimes" aria-label="Live game status"><div class="gameTimeZone"><div class="tzLabel">STATUS</div><div class="tzValue">LIVE</div></div><div class="gameTimeZone"><div class="tzLabel">AWAY</div><div class="tzValue">'+live.awayScore+'</div></div><div class="gameTimeZone"><div class="tzLabel">HOME</div><div class="tzValue">'+live.homeScore+'</div></div></div>';
+    $('nextMeta').textContent=(live.networks||'NFL')+(live.venue?' • '+live.venue:'');
+    return;
+  }
+  const w=weeks[currentWeek], now=new Date();
+  const games=w.games.map((g,i)=>({week:w.week,range:w.range,game:g,index:i,date:gameDateFromWeek(w,g)})).sort((a,b)=>a.date-b.date);
+  const first=games[0]||null;
+  const upcoming=games.find(x=>!scoreFor(x.game) && x.date>now)||null;
+  const hasStarted=!!(games.some(x=>scoreFor(x.game)) || (first && first.date<=now));
+  const label=$('nextEventLabel'), times=$('nextTimes');
+  if(!first){
+    if(label) label.textContent='NFL Event';
+    $('nextMatch').textContent='No event scheduled'; $('nextCountdown').textContent=''; $('nextMeta').textContent=''; if(times) times.innerHTML=''; return;
+  }
+  if(!hasStarted){
+    if(label) label.textContent='First NFL Event of Week';
+    $('nextMatch').textContent=first.game[0];
+    $('nextCountdown').textContent=countdownLong(first.date);
+    if(times) times.innerHTML=gameTimesMarkup(w,first.game);
+    $('nextMeta').textContent=`Week ${w.week} • ${first.game[1]} • ${displayNet(first.game[3])} • ${w.range}`;
+    return;
+  }
+  if(upcoming){
+    if(label) label.textContent='Next NFL Event of Week';
+    $('nextMatch').textContent=upcoming.game[0];
+    $('nextCountdown').textContent=countdownLong(upcoming.date);
+    if(times) times.innerHTML=gameTimesMarkup(w,upcoming.game);
+    $('nextMeta').textContent=`Week ${w.week} • ${upcoming.game[1]} • ${displayNet(upcoming.game[3])} • ${w.range}`;
+    return;
+  }
+  if(label) label.textContent='Week Complete';
+  $('nextMatch').textContent=`Week ${w.week} is complete`;
+  $('nextCountdown').textContent='All scheduled games final';
+  if(times) times.innerHTML='';
+  $('nextMeta').textContent=w.range;
+}
+function teamName(key){return (teamAliases[key]&&teamAliases[key][0]?teamAliases[key][0]:key).replace(/\b\w/g,c=>c.toUpperCase()).replace('49Ers','49ers');}
+function teamMatchesGame(key,g){const aliases=teamAliases[key]||[key];const txt=gameText(g);return aliases.some(a=>txt.includes(a));}
+function divisionOpponents(key){const div=teamDivisions[key];if(!div)return [];return Object.keys(teamDivisions).filter(k=>teamDivisions[k]===div&&k!==key);}
+function activateCommandTab(tab){
+  document.querySelectorAll('.commandSubtab').forEach(b=>b.classList.toggle('active',b.dataset.commandTab===tab));
+  document.querySelectorAll('.commandPane').forEach(p=>p.classList.remove('active'));
+  const pane = tab==='primetime' ? $('primeBoard') : tab==='division' ? $('divisionBoard') : $('commandOverview');
+  if(pane) pane.classList.add('active');
+  localStorage.setItem('nflCommandTab',tab);
+}
+function initCommandTabs(){
+  document.querySelectorAll('.commandSubtab').forEach(b=>{b.onclick=()=>activateCommandTab(b.dataset.commandTab);});
+  activateCommandTab(localStorage.getItem('nflCommandTab')||'overview');
+}
+function renderCommandTeamOptions(){
+  const sel=$('commandTeamSelect');
+  sel.innerHTML=Object.keys(teamAliases).sort((a,b)=>teamName(a).localeCompare(teamName(b))).map(k=>`<option value="${k}">${teamName(k)}</option>`).join('');
+  sel.value=localStorage.getItem('nflCommandTeam')||'steelers';
+}
+function renderCommandCenter(){
+  applyCommandTeamDarkPalette();
+  const key=$('commandTeamSelect').value||'steelers';
+  const display=teamName(key);
+  const shortName=display.split(' ').slice(-1)[0];
+  $('commandTitleTeam').textContent=display;
+  const games=allGamesDated().filter(x=>teamMatchesGame(key,x.game));
+  const next=nextGame(x=>teamMatchesGame(key,x.game));
+  const prime=games.filter(x=>isPrimeOrSpecial(x.game)).length;
+  const opponents=divisionOpponents(key);
+  const divGames=games.filter(x=>opponents.some(o=>teamMatchesGame(o,x.game))).length;
+  const division=teamDivisions[key]||'Division';
+  $('commandHero').innerHTML=`<div class="teamBadge">${teamAbbr(key)}</div><div><div class="commandHeroTitle">${display} Command Center</div><div class="commandHeroMeta">Record: ${teamRecord(key).text} • ${division} • Favorite team saved on this station</div><div class="commandHeroMeta">Next Game: ${next?`Week ${next.week} — ${next.game[0]} (${next.game[1]} ${next.game[2]}, ${next.game[3]})`:'TBD'}</div></div><div class="commandHeroCountdown"><div class="lbl">Next ${shortName} Game</div><div class="value">${next?countdownLong(next.date):'TBD'}</div></div>`;
+  $('steelersStats').innerHTML=`<div class="statBox"><div class="lbl">Next ${shortName} Game</div><div class="statValue">${next?countdownLong(next.date):'TBD'}</div><div class="meta">${next?`Week ${next.week}: ${next.game[0]}`:`No upcoming ${display} game found.`}</div></div><div class="statBox"><div class="lbl">Scheduled Games</div><div class="statValue">${games.length}</div><div class="meta">Weeks 1 through 18</div></div><div class="statBox"><div class="lbl">Primetime / Special Windows</div><div class="statValue">${prime}</div><div class="meta">Thursday, Friday, Saturday, Sunday night, Monday, international, or holiday windows</div></div><div class="statBox"><div class="lbl">${division} Games</div><div class="statValue">${divGames}</div><div class="meta">Division matchups for ${display}</div></div>`;
+  const divTeams=Object.keys(teamDivisions).filter(k=>teamDivisions[k]===division).sort((a,b)=>teamName(a).localeCompare(teamName(b)));
+  $('divisionBoard').innerHTML=`<div class="lbl">${division} Standings Starter</div><div class="meta">Records are set to 0-0 until results are manually updated or live-score support is added.</div><div class="divisionTeams">${divTeams.map(k=>`<span class="divisionChip">${teamAbbr(k)} ${teamName(k)}: ${teamRecord(k).text}</span>`).join('')}</div>`;
+  const primeGames=games.filter(x=>isPrimeOrSpecial(x.game));
+  if($('primeBoard')) $('primeBoard').innerHTML=`<div class="lbl">${shortName} Primetime / Special Games</div><div class="meta">Quick view of night, holiday, Saturday, Friday, Thursday, and international windows.</div><div class="primeStrip">${primeGames.map(x=>`<div class="primeItem"><div class="wk">Week ${x.week}</div><div class="matchLine">${matchupWithBadges(x.game)}</div>${scoreFor(x.game)?finalScoreMarkup(x.game):gameCountdownMarkup(x.date)}<div class="details"><span class="tag">${x.game[1]}</span><span class="tag">${x.game[2]}</span><span class="tag network">${x.game[3]}</span></div></div>`).join('')||'<div class="meta">No primetime/special games found.</div>'}</div>`;
+  if($('scheduleSummaryTitle')) $('scheduleSummaryTitle').textContent=`Show ${display} Full Schedule (${games.length} Games)`;
+  $('steelersSchedule').innerHTML=games.map(x=>`<article class="teamResult"><div class="wk">${teamPill(key,true)} Week ${x.week}</div><div class="homeAway">${homeAwayFor(key,x.game)}</div><div class="matchLine">${matchupWithBadges(x.game)}</div>${scoreFor(x.game)?finalScoreMarkup(x.game):gameCountdownMarkup(x.date)}<div class="details"><span class="tag">${x.game[1]}</span><span class="tag">${x.game[2]}</span><span class="tag network">${x.game[3]}</span><span class="tag">${x.range}</span>${isPrimeOrSpecial(x.game)?'<span class="tag">Prime/Special</span>':''}</div></article>`).join('');
+}
+function renderTabs(){const tabs=$('tabs');tabs.innerHTML='';weeks.forEach((w,i)=>{const b=document.createElement('button');const p=weekCountdownParts(w);b.className='tab'+(i===currentWeek?' active':'')+(p?'':' past')+(w.week===8?' football-trip':'');b.innerHTML=`<div class="w">Week ${w.week}</div><div class="starts">Starts In</div><div class="cd" data-cd="${i}">${weekCountdownText(w)}</div>`;b.onclick=()=>{currentWeek=i;render();};tabs.appendChild(b);});}
+function renderFilters(){const nets=[...new Set(weeks.flatMap(w=>w.games.map(g=>cleanNet(g[3]))))].filter(Boolean).sort(); $('networkFilter').innerHTML='<option value="">All networks</option>'+nets.map(n=>`<option value="${n}">${displayNet(n)}</option>`).join('');}
+function easternDateKey(date){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const o={};parts.forEach(p=>o[p.type]=p.value);return `${o.year}${o.month}${o.day}`;}
+function normEspnAbbr(a){const m={LA:'LAR',JAC:'JAX',WSH:'WAS'};return m[a]||a;}
+function escapeHtml(v){return String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
+function statMap(arr){const out={};(arr||[]).forEach(x=>out[x.name||x.label]=x.displayValue??x.value??'');return out;}
+function linescoreFor(comp){return (comp.linescores||[]).map(x=>x.displayValue??x.value??0);}
+function playerCategoryHtml(teamBlock,catName,title){const cat=(teamBlock?.statistics||[]).find(c=>(c.name||'').toLowerCase()===catName);if(!cat||!cat.athletes?.length)return '';const labels=cat.labels||[];const rows=cat.athletes.slice(0,12).map(a=>`<tr><td>${escapeHtml(a.athlete?.displayName||'')}</td>${(a.stats||[]).map(v=>`<td>${escapeHtml(v)}</td>`).join('')}</tr>`).join('');return `<div class="boxSection"><h3>${title}</h3><table class="playerTable"><thead><tr><th>Player</th>${labels.map(l=>`<th>${escapeHtml(l)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;}
+async function openBoxScoreForGame(weekNum,gameIdx){const week=weeks.find(w=>w.week===weekNum);const g=week?.games?.[gameIdx];if(!g||!scoreFor(g))return;const modal=$('boxScoreModal'),body=$('boxScoreBody');modal.classList.add('open');modal.setAttribute('aria-hidden','false');$('boxScoreTitle').textContent=`Week ${weekNum} • ${g[0]}`;body.innerHTML='<div class="boxError">Loading full box score and player statistics…</div>';
+ try{const dateKey=easternDateKey(gameDateFromWeek(week,g));const sb=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${dateKey}`).then(r=>{if(!r.ok)throw new Error('scoreboard');return r.json();});const wanted=teamsInGame(g).map(teamAbbr).map(normEspnAbbr);let event=(sb.events||[]).find(ev=>{const cs=ev.competitions?.[0]?.competitors||[];const abs=cs.map(c=>normEspnAbbr(c.team?.abbreviation));return wanted.every(a=>abs.includes(a));});if(!event)throw new Error('Game not found');const sum=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${event.id}`).then(r=>{if(!r.ok)throw new Error('summary');return r.json();});const comp=sum.header?.competitions?.[0]||event.competitions?.[0];const competitors=(comp?.competitors||[]).slice().sort((a,b)=>(b.homeAway==='away')-(a.homeAway==='away'));const away=competitors.find(c=>c.homeAway==='away')||competitors[0],home=competitors.find(c=>c.homeAway==='home')||competitors[1];const periods=Math.max(linescoreFor(away).length,linescoreFor(home).length,4);const qh=Array.from({length:periods},(_,i)=>`<th>${i<4?'Q'+(i+1):'OT'+(i-3)}</th>`).join('');const quarter=`<table class="quarterTable"><thead><tr><th>Team</th>${qh}<th>T</th></tr></thead><tbody><tr><td>${escapeHtml(away.team?.abbreviation)}</td>${linescoreFor(away).map(v=>`<td>${v}</td>`).join('')}<td><b>${away.score}</b></td></tr><tr><td>${escapeHtml(home.team?.abbreviation)}</td>${linescoreFor(home).map(v=>`<td>${v}</td>`).join('')}<td><b>${home.score}</b></td></tr></tbody></table>`;const bt=sum.boxscore?.teams||[];const awayStats=statMap(bt.find(t=>t.team?.id===away.team?.id)?.statistics),homeStats=statMap(bt.find(t=>t.team?.id===home.team?.id)?.statistics);const statKeys=['totalYards','netPassingYards','rushingYards','firstDowns','thirdDownEff','turnovers','totalPenaltiesYards','possessionTime'];const statLabels={totalYards:'Total Yards',netPassingYards:'Passing Yards',rushingYards:'Rushing Yards',firstDowns:'First Downs',thirdDownEff:'3rd Down',turnovers:'Turnovers',totalPenaltiesYards:'Penalties-Yards',possessionTime:'Time of Possession'};const statsRows=statKeys.map(k=>`<tr><td>${statLabels[k]}</td><td>${escapeHtml(awayStats[k]||'—')}</td><td>${escapeHtml(homeStats[k]||'—')}</td></tr>`).join('');const players=sum.boxscore?.players||[];const aPlayers=players.find(p=>p.team?.id===away.team?.id),hPlayers=players.find(p=>p.team?.id===home.team?.id);body.innerHTML=`<div class="boxScoreHeader"><div><div class="boxTeamName">${escapeHtml(away.team?.displayName)}</div><div class="meta">${escapeHtml(away.records?.[0]?.summary||'')}</div></div><div><div class="boxFinal">Final</div><div class="boxBigScore">${away.score} – ${home.score}</div></div><div><div class="boxTeamName">${escapeHtml(home.team?.displayName)}</div><div class="meta">${escapeHtml(home.records?.[0]?.summary||'')}</div></div></div>${quarter}<div class="boxSection"><h3>Team Comparison</h3><table class="statTable"><thead><tr><th>Stat</th><th>${escapeHtml(away.team?.abbreviation)}</th><th>${escapeHtml(home.team?.abbreviation)}</th></tr></thead><tbody>${statsRows}</tbody></table></div><div class="boxTeamsGrid"><div class="boxTeamPanel"><div class="boxTeamName">${escapeHtml(away.team?.displayName)}</div>${playerCategoryHtml(aPlayers,'passing','Passing')}${playerCategoryHtml(aPlayers,'rushing','Rushing')}${playerCategoryHtml(aPlayers,'receiving','Receiving')}</div><div class="boxTeamPanel"><div class="boxTeamName">${escapeHtml(home.team?.displayName)}</div>${playerCategoryHtml(hPlayers,'passing','Passing')}${playerCategoryHtml(hPlayers,'rushing','Rushing')}${playerCategoryHtml(hPlayers,'receiving','Receiving')}</div></div><div class="boxSource">Detailed statistics load live when the dashboard has internet access. Source: ESPN public game data.</div>`;
+ }catch(err){body.innerHTML=`<div class="boxError"><b>Box score data could not be loaded.</b><br><br>The final score is saved in the dashboard, but detailed statistics require an internet connection and access to the live game-data service. Try again while online.</div>`;}}
+function closeBoxScore(){const modal=$('boxScoreModal');modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}
+function liveKeyForGame(g){const teams=teamsInGame(g).map(k=>teamAbbr(k)).map(normEspnAbbr).sort();return teams.length===2?teams.join('|'):'';}
+function liveStateForGame(g){const key=liveKeyForGame(g);return key&&window.__liveNFLGames?window.__liveNFLGames[key]||null:null;}
+function liveGameMarkup(live){
+  return `<div class="gameCountdown"><span class="label">LIVE GAME</span><span class="value">${escapeHtml(live.status||'In Progress')}</span></div>
+  <div class="finalScore"><span class="scoreLabel">Live Score</span><span class="scoreValue">${escapeHtml(live.awayScore)} - ${escapeHtml(live.homeScore)}</span></div>`;
+}
+function renderGameCard(g,w){const selected=($('commandTeamSelect')&&$('commandTeamSelect').value)||'steelers';const featured=teamMatchesGame(selected,g);const dt=gameDateFromWeek(w,g);const result=scoreFor(g);const live=liveStateForGame(g);const gameIdx=w.games.indexOf(g);const tripGame=w.week===8&&(g[0]==='Carolina Panthers at Green Bay Packers'||g[0]==='Minnesota Vikings at Detroit Lions');return `<article id="weekGame-${w.week}-${gameIdx}" class="game ${featured?'steelers':''} ${tripGame?'tripGame':''} ${live?'liveNow':''}"><div class="matchLine">${matchupWithBadges(g)}</div>${live?liveGameMarkup(live):(result?finalScoreMarkup(g):gameCountdownMarkup(dt))}${live?'':gameTimesMarkup(w,g)}<div class="details"><span class="tag ${g[1]=='TBD'?'tbd':''}">${g[1]}</span><span class="tag network ${g[3]=='TBD'?'tbd':''}">${g[3]}</span>${live?'<span class="tag winnerTag">LIVE</span>':(result?'<span class="tag winnerTag">FINAL</span>':'')}${result?`<button class="boxScoreBtn" type="button" onclick="openBoxScoreForGame(${w.week},${gameIdx})">BOX SCORE ›</button>`:''}</div></article>`;}
+function renderGames(filtered,w){
+  const root=$('games'); root.innerHTML='';
+  const groups={}; filtered.forEach(g=>{const label=groupLabel(g); (groups[label] ||= []).push(g);});
+  groupOrder.filter(label=>groups[label]).forEach(label=>{
+    const wrap=document.createElement('section'); wrap.className='group';
+    wrap.innerHTML=`<div class="groupHeader"><h3 class="groupTitle">${label}</h3><span class="groupMeta">${groups[label].length} game${groups[label].length>1?'s':''}</span></div><div class="games">${groups[label].map(g=>renderGameCard(g,w)).join('')}</div>`;
+    root.appendChild(wrap);
+  });
+}
+function renderWeekScoreboard(w){const completed=w.games.map((g,i)=>({g,i,sc:scoreFor(g)})).filter(x=>x.sc);const panel=$('weekScoreboard');if(!panel)return;if(!completed.length){panel.classList.remove('show');$('weekScoreGrid').innerHTML='';return;}panel.classList.add('show');$('weekScoreTitle').textContent=`Week ${w.week} Scoreboard`;$('weekScoreMeta').textContent=completed.length===w.games.length?`All ${completed.length} games final`:`${completed.length} final result${completed.length===1?'':'s'} loaded • ${w.games.length-completed.length} remaining`; $('weekScoreGrid').innerHTML=completed.map(({g,i,sc})=>{const teams=teamsInGame(g);const n1=teamName(teams[0]||'').replace(/^Los Angeles /,'LA ').replace(/^New York /,'NY ');const n2=teamName(teams[1]||'').replace(/^Los Angeles /,'LA ').replace(/^New York /,'NY ');const c1=sc[0]>sc[1]?'winner':'',c2=sc[1]>sc[0]?'winner':'';return `<button type="button" class="scoreSummaryGame" onclick="jumpToWeekGame(${i})"><div class="scoreTeams"><div class="scoreTeam ${c1}">${teamPill(teams[0],true)} ${n1}</div><div class="scoreNum">${sc[0]}</div><div class="scoreTeam ${c2}">${teamPill(teams[1],true)} ${n2}</div><div class="scoreNum">${sc[1]}</div></div><div class="scoreStatus">FINAL • ${g[1]} ${g[2]}</div></button>`;}).join('');}
+function jumpToWeekGame(gameIdx){$('search').value='';$('networkFilter').value='';$('primeFilter').checked=false;render();requestAnimationFrame(()=>{const el=document.getElementById(`weekGame-${weeks[currentWeek].week}-${gameIdx}`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.remove('jumpFlash');void el.offsetWidth;el.classList.add('jumpFlash');}});}
+function renderNetworkSeason(net,q,primeOnly){
+  const root=$('games'); root.innerHTML='';
+  const all=[];
+  weeks.forEach(w=>w.games.forEach(g=>{if(cleanNet(g[3])===net && (!q||gameText(g).includes(q)) && (!primeOnly||isPrimeOrSpecial(g))) all.push({week:w.week,range:w.range,game:g,date:gameDateFromWeek(w,g),weekObj:w});}));
+  const current=all.filter(x=>x.week===weeks[currentWeek].week);
+  const remaining=all.filter(x=>x.week!==weeks[currentWeek].week);
+  const section=(title,meta,items)=>`<section class="group"><div class="groupHeader"><h3 class="groupTitle">${title}</h3><span class="groupMeta">${meta}</span></div><div class="games">${items.map(x=>`<article class="game"><div class="wk">Week ${x.week}</div><div class="matchLine">${matchupWithBadges(x.game)}</div>${scoreFor(x.game)?finalScoreMarkup(x.game):gameCountdownMarkup(x.date)}<div class="details"><span class="tag">${x.game[1]}</span><span class="tag">${x.game[2]}</span><span class="tag network">${x.game[3]}</span><span class="tag">${x.range}</span></div></article>`).join('')||'<article class="game"><div class="meta">No games for this network in the selected week.</div></article>'}</div></section>`;
+  root.innerHTML = section(`${displayNet(net)} — Current Week`, `Week ${weeks[currentWeek].week}`, current) + section(`${displayNet(net)} — Full Season`, `${all.length} game${all.length===1?'':'s'}`, current.concat(remaining));
+  $('empty').style.display=all.length?'none':'block';
+}
+function canonicalTeam(query){const q=query.trim().toLowerCase(); if(!q) return null; for(const [team,aliases] of Object.entries(teamAliases)){if(aliases.some(a=>a.includes(q)||q.includes(a))) return team;} return q;}
+function renderTeamSchedule(){
+  const q=$('teamSearch').value.trim().toLowerCase(), root=$('teamResults'), hint=$('teamHint'); root.innerHTML='';
+  if(!q){hint.textContent='';return;}
+  const key=canonicalTeam(q); const aliases=teamAliases[key]||[q];
+  const matches=[];
+  weeks.forEach(w=>w.games.forEach(g=>{const txt=gameText(g); if(aliases.some(a=>txt.includes(a))) matches.push({week:w.week,range:w.range,game:g,date:gameDateFromWeek(w,g)});}));
+  hint.textContent=matches.length?`${matches.length} games found for "${q}".`:`No exact team match yet. Try city + nickname, e.g. Pittsburgh Steelers.`;
+  root.innerHTML=matches.map(x=>`<article class="teamResult"><div class="wk">Week ${x.week}</div><div class="matchLine">${matchupWithBadges(x.game)}</div>${scoreFor(x.game)?finalScoreMarkup(x.game):gameCountdownMarkup(x.date)}<div class="details"><span class="tag">${x.game[1]}</span><span class="tag">${x.game[2]}</span><span class="tag network">${x.game[3]}</span><span class="tag">${x.range}</span></div></article>`).join('');
+}
+function render(){renderTabs();const w=weeks[currentWeek],q=$('search').value.toLowerCase(),net=$('networkFilter').value,primeOnly=$('primeFilter').checked;$('weekName').textContent=`Week ${w.week}`;$('weekRange').textContent=w.range;$('gameCount').textContent=`${w.games.length} games`;const p=weekCountdownParts(w);$('d').textContent=p?p.d:'0';$('h').textContent=p?fmt(p.h):'00';$('m').textContent=p?fmt(p.m):'00';$('s').textContent=p?fmt(p.s):'00';const filtered=w.games.filter(g=>(!q||gameText(g).includes(q))&&(!net||cleanNet(g[3])===net)&&(!primeOnly||isPrimeOrSpecial(g)));if(net){renderNetworkSeason(net,q,primeOnly);}else{renderGames(filtered,w);$('empty').style.display=filtered.length?'none':'block';}const ftb=$('footballTripBanner'); if(ftb) ftb.classList.toggle('show',w.week===8); renderWeekScoreboard(w);renderNextEvent();renderCommandCenter();renderTeamSchedule();renderDashboardStatus();}
+function applyTheme(mode){applyCommandTeamDarkPalette();document.body.classList.toggle('light',mode==='light');$('themeToggle').textContent=mode==='light'?'🌙 Dark mode':'☀️ Light mode';localStorage.setItem('nflDashTheme',mode);}
+setInterval(()=>{document.querySelectorAll('[data-cd]').forEach(el=>el.textContent=weekCountdownText(weeks[+el.dataset.cd]));const p=weekCountdownParts(weeks[currentWeek]);$('d').textContent=p?p.d:'0';$('h').textContent=p?fmt(p.h):'00';$('m').textContent=p?fmt(p.m):'00';$('s').textContent=p?fmt(p.s):'00';renderNextEvent();renderCommandCenter();refreshGameCountdowns();},1000);
+$('search').addEventListener('input',render);$('networkFilter').addEventListener('change',render);$('primeFilter').addEventListener('change',render);$('printWeek').addEventListener('click',()=>window.print());$('teamSearch').addEventListener('input',renderTeamSchedule);$('commandTeamSelect').addEventListener('change',()=>{localStorage.setItem('nflCommandTeam',$('commandTeamSelect').value);applyCommandTeamDarkPalette();render();});$('themeToggle').addEventListener('click',()=>applyTheme(document.body.classList.contains('light')?'dark':'light'));
+
+
+// V17 NFL Standings Center
+const officialStandingsOrder={
+ 'AFC East':['bills','jets','patriots','dolphins'],
+ 'AFC North':['browns','ravens','bengals','steelers'],
+ 'AFC South':['jaguars','colts','titans','texans'],
+ 'AFC West':['chiefs','raiders','broncos','chargers'],
+ 'NFC East':['eagles','giants','cowboys','commanders'],
+ 'NFC North':['vikings','lions','bears','packers'],
+ 'NFC South':['panthers','saints','falcons','buccaneers'],
+ 'NFC West':['49ers','seahawks','rams','cardinals']
+};
+let standingsConference='ALL';
+function standingsStats(key){let w=0,l=0,t=0,pf=0,pa=0,divW=0,divL=0,divT=0;const seq=[];weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];pf+=a;pa+=b;let r='T';if(a>b){w++;r='W'}else if(a<b){l++;r='L'}else t++;seq.push(r);const opp=teams[1-idx];if(teamDivisions[opp]===teamDivisions[key]){if(r==='W')divW++;else if(r==='L')divL++;else divT++;}}));const games=w+l+t;const pct=games?((w+.5*t)/games):0;let streak='-';if(seq.length){const last=seq[seq.length-1];let n=0;for(let i=seq.length-1;i>=0&&seq[i]===last;i--)n++;streak=`${n}${last}`;}return {w,l,t,pf,pa,diff:pf-pa,pct,div:`${divW}-${divL}${divT?'-'+divT:''}`,streak,text:`${w}-${l}${t?'-'+t:''}`};}
+function standingRow(key,rank){const st=standingsStats(key);const diffClass=st.diff>0?'diffPos':st.diff<0?'diffNeg':'';const pct=st.pct.toFixed(3).replace(/^0/,'');return `<tr class="standingsTeamRow" data-team="${key}" title="Open ${teamName(key)} season schedule"><td><div class="standingsTeam"><span class="standingRank">${rank}</span>${teamPill(key,true)}<span>${teamName(key)}</span></div></td><td class="standingRecord">${st.w}</td><td>${st.l}</td><td>${st.t}</td><td>${pct}</td><td>${st.pf}</td><td>${st.pa}</td><td class="${diffClass}">${st.diff>0?'+':''}${st.diff}</td><td>${st.div}</td><td>${st.streak}</td></tr>`;}
+function divisionMarkup(div){const teams=officialStandingsOrder[div]||[];const body=teams.map((k,i)=>standingRow(k,i+1)).join('');return `<section class="divisionCard" data-division="${div}"><div class="divisionHead"><span>${div}</span><span class="clickHint">Click team → full schedule</span></div><div style="overflow:auto"><table class="standingsTable"><thead><tr><th>Team</th><th>W</th><th>L</th><th>T</th><th>PCT</th><th>PF</th><th>PA</th><th>DIFF</th><th>DIV</th><th>STRK</th></tr></thead><tbody>${body}</tbody></table></div></section>`;}
+function renderStandings(){const grid=$('standingsGrid');if(!grid)return;const q=($('standingsSearch')?.value||'').trim().toLowerCase();const conferences=['AFC','NFC'].filter(c=>standingsConference==='ALL'||standingsConference===c);grid.innerHTML=conferences.map(conf=>{const divs=Object.keys(officialStandingsOrder).filter(d=>d.startsWith(conf)).filter(d=>!q||(officialStandingsOrder[d]||[]).some(k=>teamName(k).toLowerCase().includes(q)||teamAbbr(k).toLowerCase().includes(q)));return `<div class="conferenceBoard"><div class="conferenceTitle">${conf==='AFC'?'American Football Conference':'National Football Conference'}</div>${divs.map(divisionMarkup).join('')||'<div class="meta">No teams match that search.</div>'}</div>`;}).join('');grid.querySelectorAll('.standingsTeamRow').forEach(r=>r.addEventListener('click',()=>openStandingsTeam(r.dataset.team)));}
+function resultForTeam(key,g){const sc=scoreFor(g);if(!sc)return null;const teams=teamsInGame(g),idx=teams.indexOf(key);if(idx<0)return null;const a=sc[idx],b=sc[1-idx];return {for:a,against:b,outcome:a>b?'W':a<b?'L':'T'};}
+function openStandingsTeam(key){const drawer=$('standingsTeamDrawer');const st=standingsStats(key);const games=allGamesDated().filter(x=>teamMatchesGame(key,x.game));drawer.innerHTML=`<div class="drawerTop"><div><div class="nextLabel">Season Schedule</div><div class="drawerTitle">${teamPill(key)} ${teamName(key)}</div><div class="drawerRecord">${st.text} • ${teamDivisions[key]} • PF ${st.pf} / PA ${st.pa}</div></div><button type="button" class="drawerBack" id="closeStandingsTeam">Close Team Schedule</button></div><div class="scheduleResultGrid">${games.map(x=>{const r=resultForTeam(key,x.game);const cls=r?`final${r.outcome==='W'?'Win':r.outcome==='L'?'Loss':'Tie'}`:'';const status=r?`<div class="scheduleStatus ${r.outcome==='W'?'win':r.outcome==='L'?'loss':'tie'}">${r.outcome} • ${r.for}-${r.against} FINAL</div>`:`<div class="scheduleStatus">Upcoming • ${x.game[1]} ${x.game[2]} • ${x.game[3]}</div>`;const gameIdx=(weeks.find(w=>w.week===x.week)?.games||[]).indexOf(x.game);const boxBtn=r&&gameIdx>=0?`<button class="boxScoreBtn" type="button" onclick="openBoxScoreForGame(${x.week},${gameIdx})">BOX SCORE ›</button>`:'';return `<article class="scheduleResultCard ${cls}"><div class="wk">Week ${x.week}</div><div class="homeAway">${homeAwayFor(key,x.game)}</div><div class="match">${x.game[0]}</div>${status}${boxBtn?`<div class="details" style="margin-top:9px">${boxBtn}</div>`:''}<div class="meta" style="margin-top:7px">${x.range}</div></article>`;}).join('')}</div>`;drawer.classList.add('active');$('closeStandingsTeam').onclick=()=>{drawer.classList.remove('active');drawer.innerHTML='';};drawer.scrollIntoView({behavior:'smooth',block:'start'});}
+function initStandingsControls(){document.querySelectorAll('.standingsControls [data-conf]').forEach(b=>b.addEventListener('click',()=>{standingsConference=b.dataset.conf;document.querySelectorAll('.standingsControls [data-conf]').forEach(x=>x.classList.toggle('active',x===b));renderStandings();}));if($('standingsSearch'))$('standingsSearch').addEventListener('input',renderStandings);}
+
+// V15 Stadium Attendance Center
+const stadiumMembers=['Roman','Steven','Darren','Jeremy','Jacob','Kenny','Devin','Justin'];
+const memberColors={Roman:'#2563eb',Steven:'#0f9488',Kenny:'#f59e0b',Jeremy:'#7e22ce',Darren:'#dc2626',Jacob:'#65a30d',Devin:'#1d4ed8',Justin:'#0f2a52'};
+const stadiumAttendance=[
+ {s:'AZ (State Farm)',team:'ARI',x:53,y:62,a:['Roman','Steven','Kenny','Jacob']},
+ {s:'ATL (M-B)',team:'ATL',x:63,y:68,a:['Roman','Steven','Jeremy','Darren','Jacob']},
+ {s:'BAL (M&T)',team:'BAL',x:75,y:48,a:['Roman','Darren']},
+ {s:'BUF (Highmark)',team:'BUF',x:75,y:32,a:['Roman','Steven','Jeremy']},
+ {s:'CAR (BoA)',team:'CAR',x:68,y:60,a:['Roman','Steven','Darren','Devin','Justin']},
+ {s:'CHI (Soldier)',team:'CHI',x:55,y:38,a:['Roman','Steven','Kenny','Jeremy','Darren','Jacob','Devin','Justin']},
+ {s:'CIN (Paycor)',team:'CIN',x:62,y:48,a:['Roman','Steven','Kenny','Jeremy','Darren','Devin','Justin']},
+ {s:'CLE (Huntington)',team:'CLE',x:66,y:41,a:['Roman','Steven','Kenny','Jeremy','Darren']},
+ {s:'DAL (AT&T)',team:'DAL',x:44,y:66,a:['Roman','Steven','Kenny','Darren','Jacob','Devin']},
+ {s:'DEN (Empower)',team:'DEN',x:35,y:51,a:['Roman','Steven','Kenny','Jeremy','Darren','Jacob','Devin']},
+ {s:'DET (Ford)',team:'DET',x:61,y:36,a:['Roman','Jeremy','Darren','Jacob']},
+ {s:'GB (Lambeau)',team:'GB',x:53,y:31,a:['Jeremy']},
+ {s:'HOU (NRG)',team:'HOU',x:47,y:72,a:['Roman','Steven','Kenny','Jeremy','Darren','Jacob','Devin']},
+ {s:'IND (Lucas Oil)',team:'IND',x:59,y:48,a:['Roman','Steven','Darren']},
+ {s:'JAX (EverBank)',team:'JAX',x:67,y:76,a:['Roman','Steven','Jeremy','Darren','Jacob']},
+ {s:'KC (Arrowhead)',team:'KC',x:46,y:49,a:['Roman','Steven','Jeremy','Jacob','Devin']},
+ {s:'LV (Allegiant)',team:'LV',x:22,y:58,a:['Roman','Steven','Kenny','Devin','Justin']},
+ {s:'LAR/LAC (SoFi)',team:'LAR/LAC',x:18,y:62,a:['Roman','Kenny']},
+ {s:'MIA (Hard Rock)',team:'MIA',x:71,y:82,a:['Roman','Steven','Darren','Devin']},
+ {s:'MIN (US Bank)',team:'MIN',x:50,y:28,a:['Roman','Steven','Kenny','Jeremy','Darren','Devin','Justin']},
+ {s:'NE (Gillette)',team:'NE',x:83,y:36,a:['Roman','Steven','Darren']},
+ {s:'NO (Superdome)',team:'NO',x:54,y:73,a:['Roman','Steven','Jeremy','Darren','Jacob']},
+ {s:'NYG/NYJ (MetLife)',team:'NYG/NYJ',x:79,y:43,a:['Roman','Steven','Jeremy','Darren','Jacob']},
+ {s:'PHI (Linc)',team:'PHI',x:77,y:46,a:['Roman','Steven','Kenny','Jeremy','Darren','Jacob','Devin','Justin']},
+ {s:'PIT (Acrisure)',team:'PIT',x:68,y:44,a:['Roman','Steven','Jeremy','Darren','Jacob']},
+ {s:"SF (Levi's)",team:'SF',x:13,y:48,a:['Roman','Steven','Jeremy','Jacob']},
+ {s:'SEA (Lumen)',team:'SEA',x:18,y:18,a:['Roman','Steven','Jeremy','Darren','Jacob']},
+ {s:'TB (Ray Jay)',team:'TB',x:67,y:80,a:['Roman','Steven','Jeremy','Darren','Jacob']},
+ {s:'TEN (Nissan)',team:'TEN',x:58,y:61,a:['Roman','Steven','Kenny','Darren','Devin','Justin']},
+ {s:'WAS (Northwest)',team:'WAS',x:75,y:50,a:['Roman','Steven','Jeremy','Darren','Jacob']}
+]
+function hideSpecialPanels(){if($('stadiumAttendancePanel'))$('stadiumAttendancePanel').style.display='none';if($('standingsPanel'))$('standingsPanel').style.display='none';}
+function showStadiumAttendance(){document.body.classList.add('hideMainDashboard');hideSpecialPanels();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('stadiumTopTab').classList.add('active');$('stadiumAttendancePanel').style.display='block';renderStadiumAttendance();window.scrollTo({top:0,behavior:'smooth'});} 
+function showStandings(){document.body.classList.add('hideMainDashboard');hideSpecialPanels();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('standingsTopTab').classList.add('active');$('standingsPanel').style.display='block';renderStandings();window.scrollTo({top:0,behavior:'smooth'});} 
+function showScheduleDashboard(){document.body.classList.remove('hideMainDashboard');hideSpecialPanels();}
+function renderStadiumTab(){const tabs=$('tabs');if(!tabs||$('stadiumTopTab'))return;const b=document.createElement('button');b.id='stadiumTopTab';b.type='button';b.className='tab stadiumTabButton';b.innerHTML='<div class="w">🏟️ Stadium Attendance</div><div class="starts">Group List</div><div class="cd">Member Views</div>';b.onclick=showStadiumAttendance;tabs.appendChild(b);} 
+function renderStandingsTab(){const tabs=$('tabs');if(!tabs||$('standingsTopTab'))return;const b=document.createElement('button');b.id='standingsTopTab';b.type='button';b.className='tab standingsTabButton';b.innerHTML='<span class="newBadge">NEW</span><div class="w">🏆 NFL Standings</div><div class="starts">AFC + NFC</div><div class="cd">Team Schedules</div>';b.onclick=showStandings;tabs.appendChild(b);} 
+const originalRenderTabs=renderTabs;
+function isWeekComplete(w){return w.games.length>0 && w.games.every(g=>!!scoreFor(g));}
+function currentActiveWeekIndex(){
+  const firstOpen=weeks.findIndex(w=>!isWeekComplete(w));
+  return firstOpen>=0?firstOpen:weeks.length-1;
+}
+function buildWeekTab(w,i,mini=false){
+  const b=document.createElement('button');
+  const p=weekCountdownParts(w);
+  const isCurrent=i===currentActiveWeekIndex();
+  const isTrip=w.week===8;
+  b.className='tab'+(mini?' completedMini':'')+(isCurrent&&!mini?' currentWeekTab':'')+(i===currentWeek&&!document.body.classList.contains('hideMainDashboard')?' active':'')+(p?'':' past')+(isTrip?' football-trip':'');
+  if(isTrip&&!mini){
+    b.innerHTML=`<div class="w">🏟️ Week 8</div><div class="starts">STADIUM CHASERS UNITE</div><div class="cd">GB Thursday • DET Sunday</div>`;
+  } else if(mini){
+    b.innerHTML=`<div class="w">Week ${w.week}</div>`;
+  } else {
+    b.innerHTML=`<div class="w">Week ${w.week}</div><div class="starts">${isCurrent?'CURRENT WEEK':'Starts In'}</div><div class="cd" data-cd="${i}">${weekCountdownText(w)}</div>`;
+  }
+  b.onclick=()=>{showScheduleDashboard();currentWeek=i;render();};
+  return b;
+}
+renderTabs=function(){
+  const tabs=$('tabs'), completed=$('completedTabs'), completedBar=$('completedTabsBar');
+  tabs.innerHTML=''; if(completed) completed.innerHTML='';
+  renderStandingsTab(); renderStadiumTab();
+  const currentIdx=currentActiveWeekIndex();
+  // Current week sits immediately after Stadium Attendance, then all upcoming weeks.
+  weeks.forEach((w,i)=>{if(!isWeekComplete(w)) tabs.appendChild(buildWeekTab(w,i,false));});
+  // Finished weeks are intentionally smaller and moved to a quiet second row.
+  const done=weeks.map((w,i)=>({w,i})).filter(x=>isWeekComplete(x.w));
+  if(completedBar) completedBar.style.display=done.length?'flex':'none';
+  if(completed) done.forEach(({w,i})=>completed.appendChild(buildWeekTab(w,i,true)));
+};
+function selectedStadiumMember(){return $('stadiumMemberFilter')?.value||'';}
+function setStadiumMember(member){if($('stadiumMemberFilter'))$('stadiumMemberFilter').value=member;if($('stadiumMemberQuickSelect'))$('stadiumMemberQuickSelect').value=member;renderStadiumAttendance();}
+function initStadiumFilters(){const sel=$('stadiumMemberFilter');if(!sel||sel.dataset.ready)return;const opts='<option value="">Group Summary / All members</option>'+stadiumMembers.map(m=>`<option value="${m}">${m}</option>`).join('');sel.innerHTML=opts;if($('stadiumMemberQuickSelect'))$('stadiumMemberQuickSelect').innerHTML=opts;const chips=$('stadiumMemberChips');if(chips){chips.innerHTML=`<button type="button" class="memberChip all" data-member="">Group Summary</button>`+stadiumMembers.map(m=>`<button type="button" class="memberChip" data-member="${m}" style="background:linear-gradient(135deg,${memberColors[m]},#38bdf8)">${m}</button>`).join('');chips.querySelectorAll('.memberChip').forEach(b=>b.addEventListener('click',()=>setStadiumMember(b.dataset.member)));}sel.dataset.ready='1';$('stadiumSearch').addEventListener('input',renderStadiumAttendance);sel.addEventListener('change',()=>{if($('stadiumMemberQuickSelect'))$('stadiumMemberQuickSelect').value=sel.value;renderStadiumAttendance();});if($('stadiumMemberQuickSelect'))$('stadiumMemberQuickSelect').addEventListener('change',e=>setStadiumMember(e.target.value));$('stadiumStatusFilter').addEventListener('change',renderStadiumAttendance);}
+function memberTotals(){return Object.fromEntries(stadiumMembers.map(m=>[m,stadiumAttendance.filter(r=>!r.h&&r.a.includes(m)).length]));}
+function renderMemberSpotlight(){const member=selectedStadiumMember();const totals=memberTotals();const current=stadiumAttendance.filter(r=>!r.h);const historic=stadiumAttendance.filter(r=>r.h);document.querySelectorAll('.memberChip').forEach(b=>b.classList.toggle('active',b.dataset.member===member));if(!member){$('memberSpotlightTitle').textContent='Group Summary';$('memberSpotlightMeta').textContent='Select a person above to switch the entire tab into that member\'s personal stadium view.';$('memberProfileGrid').innerHTML=`<div class="memberProfileCard"><div class="big">${current.filter(r=>r.a.length).length}</div><div class="small">Current stadiums with group visit</div></div><div class="memberProfileCard"><div class="big">${Object.values(totals).reduce((a,b)=>a+b,0)}</div><div class="small">Total attendance marks</div></div><div class="memberProfileCard"><div class="big">${stadiumMembers.length}</div><div class="small">Members tracked</div></div><div class="memberProfileCard"><div class="big">${current.length}</div><div class="small">Stadiums tracked</div></div>`;return;}const visitedCurrent=current.filter(r=>r.a.includes(member)).length;const missingCurrent=current.length-visitedCurrent;const visitedHistoric=historic.filter(r=>r.a.includes(member)).length;const rank=stadiumMembers.slice().sort((a,b)=>totals[b]-totals[a]).indexOf(member)+1;const pct=Math.round(visitedCurrent/current.length*100);$('memberSpotlightTitle').textContent=`${member} Stadium Page`;$('memberSpotlightMeta').textContent=`Personal view for ${member}: stats, highlighted map, filtered bucket list, and highlighted matrix column.`;$('memberProfileGrid').innerHTML=`<div class="memberProfileCard"><div class="big">${visitedCurrent}</div><div class="small">Current NFL stadiums</div></div><div class="memberProfileCard"><div class="big">${pct}%</div><div class="small">Current completion</div></div><div class="memberProfileCard"><div class="big">#${rank}</div><div class="small">Group rank</div></div><div class="memberProfileCard"><div class="big">${missingCurrent}</div><div class="small">Current remaining</div></div><div class="memberProfileCard"><div class="big">${totals[member]}</div><div class="small">Total stadiums attended</div></div>`;}
+function renderStadiumStats(rows){const member=selectedStadiumMember();const totals=memberTotals();const current=stadiumAttendance.filter(r=>!r.h);if(member){const visited=current.filter(r=>r.a.includes(member)).length;const missing=current.length-visited;const hist=stadiumAttendance.filter(r=>r.h&&r.a.includes(member)).length;const pct=Math.round(visited/current.length*100);$('stadiumStatsGrid').innerHTML=`<div class="stadiumStat"><div class="value">${visited}</div><div class="label">${member} Current Stadiums</div></div><div class="stadiumStat"><div class="value">${missing}</div><div class="label">${member} Remaining</div></div><div class="stadiumStat"><div class="value">${pct}%</div><div class="label">Completion</div></div><div class="stadiumStat"><div class="value">${totals[member]}</div><div class="label">Total Attended</div></div>`;return;}const totalVisits=Object.values(totals).reduce((a,b)=>a+b,0);const avg=(totalVisits/stadiumMembers.length).toFixed(1);$('stadiumStatsGrid').innerHTML=`<div class="stadiumStat"><div class="value">${current.length}</div><div class="label">Current Stadium Rows</div></div><div class="stadiumStat"><div class="value">${stadiumMembers.length}</div><div class="label">Group Members</div></div><div class="stadiumStat"><div class="value">${totalVisits}</div><div class="label">Total Attendances</div></div><div class="stadiumStat"><div class="value">${avg}</div><div class="label">Average Per Person</div></div>`;}
+function renderLeaderboard(){const totals=memberTotals();const max=Math.max(...Object.values(totals));const sorted=stadiumMembers.slice().sort((a,b)=>totals[b]-totals[a]);const selected=selectedStadiumMember();$('stadiumLeaderboard').innerHTML=sorted.map((m,i)=>`<div class="leaderRow" style="${m===selected?'outline:2px solid #facc15;border-radius:12px;padding:4px;background:rgba(250,204,21,.12)':''}"><div class="rankMedal">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div><div class="leaderName">${m}</div><div class="barTrack"><div class="barFill" style="width:${Math.round(totals[m]/max*100)}%;background:linear-gradient(90deg,${memberColors[m]},#38bdf8)"></div></div><div>${totals[m]}</div></div>`).join('');}
+function renderMiniMap(){const map=$('stadiumMiniMap');const tip=$('stadiumMapTip');const selected=selectedStadiumMember();Array.from(map.querySelectorAll('.mapDot')).forEach(d=>d.remove());stadiumAttendance.forEach(r=>{const dot=document.createElement('span');let cls='mapDot ';if(r.h)cls+='historic';else if(selected)cls+=r.a.includes(selected)?'kenny':'none';else cls+=r.a.includes('Kenny')?'kenny':r.a.length?'':'none';dot.className=cls;dot.style.left=r.x+'%';dot.style.top=r.y+'%';dot.title=r.s;dot.onmouseenter=()=>{const not=stadiumMembers.filter(m=>!r.a.includes(m));tip.innerHTML=`<b>${r.s}</b><br>${r.team}${r.h?' • Historic':''}<br><br>${selected?`<b>${selected}:</b> ${r.a.includes(selected)?'Visited':'Not Yet'}<br><br>`:''}<b>Visited:</b> ${r.a.length?r.a.join(', '):'Nobody yet'}<br><b>Not Yet:</b> ${not.join(', ')}`;};map.appendChild(dot);});tip.innerHTML=selected?`Map is now personalized for <b>${selected}</b>. Green/gold dots are visited; red dots are remaining.`:'Hover a stadium dot to see who has attended. Gold dots include Kenny. Red dots mean no active member has visited yet.';}
+function filteredStadiumRows(){const q=($('stadiumSearch')?.value||'').toLowerCase();const member=selectedStadiumMember();const status=$('stadiumStatusFilter')?.value||'';return stadiumAttendance.filter(r=>{const text=(r.s+' '+r.team).toLowerCase();if(q&&!text.includes(q))return false;if(status==='historic'&&!r.h)return false;if(status==='current'&&r.h)return false;if(member&&status==='visited'&&!r.a.includes(member))return false;if(member&&status==='missing'&&r.a.includes(member))return false;return true;});}
+function renderStadiumTable(rows){const totals=memberTotals();const selected=selectedStadiumMember();const head='<thead><tr><th>Stadium</th>'+stadiumMembers.map(m=>`<th class="memberHeader ${m===selected?'selectedMemberHeader':''}" style="background:${memberColors[m]}">${m}</th>`).join('')+'</tr></thead>';const body='<tbody>'+rows.map(r=>`<tr class="${r.h?'historicRow':''}"><td>${r.s}</td>`+stadiumMembers.map(m=>`<td class="${r.a.includes(m)?'attCell':'missCell'} ${m===selected?'selectedMemberCell':''}" ${r.a.includes(m)?`style="background:${memberColors[m]};color:#fff"`:''}>${r.a.includes(m)?'✓':'–'}</td>`).join('')+'</tr>').join('')+`<tr class="footerTotals"><td>Total Stadiums Attended</td>${stadiumMembers.map(m=>`<td class="${m===selected?'selectedMemberCell':''}">${totals[m]}</td>`).join('')}</tr></tbody>`;$('stadiumAttendanceTable').innerHTML=head+body;}
+function renderBuckets(){const member=selectedStadiumMember()||'Kenny';const nobody=stadiumAttendance.filter(r=>r.a.length===0);const memberMissing=stadiumAttendance.filter(r=>!r.a.includes(member));const memberVisited=stadiumAttendance.filter(r=>r.a.includes(member));$('stadiumBucketGrid').innerHTML=`<div class="bucketItem"><div class="bucketTitle">🧳 ${member} Bucket List</div><div class="bucketMeta">${memberMissing.length} stadiums remaining</div><div class="meta" style="color:#dbeafe;margin-top:8px">${memberMissing.slice(0,8).map(r=>r.s).join(' • ')||'Complete'}</div></div><div class="bucketItem"><div class="bucketTitle">✅ ${member} Visited</div><div class="bucketMeta">${memberVisited.length} stadiums logged</div><div class="meta" style="color:#dbeafe;margin-top:8px">${memberVisited.slice(0,8).map(r=>r.s).join(' • ')||'None yet'}</div></div><div class="bucketItem"><div class="bucketTitle">📊 Group Total</div><div class="bucketMeta">${Object.values(memberTotals()).reduce((a,b)=>a+b,0)} attendance marks across ${stadiumMembers.length} members</div><div class="meta" style="color:#dbeafe;margin-top:8px">Totals are calculated directly from the attendance matrix.</div></div><div class="bucketItem"><div class="bucketTitle">🎯 Group Opportunities</div><div class="bucketMeta">${nobody.length} stadiums nobody has logged</div><div class="meta" style="color:#dbeafe;margin-top:8px">${nobody.map(r=>r.s).join(' • ')||'Every stadium has at least one group visit logged.'}</div></div>`;}
+function renderStadiumAttendance(){initStadiumFilters();renderMemberSpotlight();const rows=filteredStadiumRows();renderStadiumStats(rows);renderLeaderboard();renderMiniMap();renderStadiumTable(rows);renderBuckets();}
+
+$('boxScoreClose').addEventListener('click',closeBoxScore);$('boxScoreModal').addEventListener('click',e=>{if(e.target===$('boxScoreModal'))closeBoxScore();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBoxScore();});
+renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsControls();applyTheme(localStorage.getItem('nflDashTheme')||'dark');render();
+</script>
+
+<script>
+(function(){
+  const nav=document.getElementById('liveScoreNav'),btn=document.getElementById('liveScoreBtn'),btnText=document.getElementById('liveScoreBtnText');
+  const panel=document.getElementById('liveScoreboardPanel'),grid=document.getElementById('liveScoreGrid'),meta=document.getElementById('liveScoreMeta'),refresh=document.getElementById('liveScoreRefresh');
+  if(!nav||!btn||!panel||!grid) return;
+  let liveTimer=null;
+  function espnUrl(){
+    const now=new Date(), y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
+    return 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates='+y+m+d;
+  }
+  function gameState(e){return e&&e.status&&e.status.type&&e.status.type.state||'pre'}
+  function comp(e){return e&&e.competitions&&e.competitions[0]||{}}
+  function team(c,where){return (c.competitors||[]).find(x=>x.homeAway===where)||{}}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function detail(e){return e?.status?.type?.shortDetail||e?.status?.type?.detail||''}
+  const bigWrap=document.getElementById('bigPlayWrap'),bigItems=document.getElementById('bigPlayItems'),bigMeta=document.getElementById('bigPlayMeta'),bigBtn=document.getElementById('bigPlayBtn'),bigPanel=document.getElementById('bigPlayPanel'),bigList=document.getElementById('bigPlayList'),bigPanelMeta=document.getElementById('bigPlayPanelMeta');
+  let lastBigPlaySignature='';
+  function allDrivePlays(summary){
+    const drives=summary?.drives||{};
+    const arr=[];
+    (drives.previous||[]).forEach(d=>(d.plays||[]).forEach(p=>arr.push(p)));
+    if(drives.current) (drives.current.plays||[]).forEach(p=>arr.push(p));
+    if(Array.isArray(summary?.plays)) summary.plays.forEach(p=>arr.push(p));
+    const seen=new Set();
+    return arr.filter(p=>{const id=String(p.id||p.sequenceNumber||p.text||'');if(!id||seen.has(id))return false;seen.add(id);return true;});
+  }
+  function isBigPlay(p){
+    const text=(p.text||p.shortText||'').toLowerCase();
+    if(p.scoringPlay) return true;
+    if(/intercept|fumble|blocked|safety|pick-six|pick six|return.*touchdown|touchdown/.test(text)) return true;
+    if(/sack/.test(text) && /(4th|fourth)/.test(text)) return true;
+    const y=text.match(/(\d+)\s*-?yard/);
+    return !!(y && Number(y[1])>=40);
+  }
+  function playText(p){return p.text||p.shortText||p.type?.text||'Big play';}
+  async function loadBigPlays(liveEvents){
+    if(!bigWrap||!bigItems||!bigList) return;
+    if(!liveEvents.length){bigWrap.classList.remove('show');bigPanel?.classList.remove('open');return;}
+    try{
+      const summaries=await Promise.all(liveEvents.map(async e=>{
+        const r=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event='+encodeURIComponent(e.id),{cache:'no-store'});
+        if(!r.ok) return {event:e,plays:[]};
+        const s=await r.json();
+        const competitors=s?.header?.competitions?.[0]?.competitors||[];
+        const teamMap=Object.fromEntries(competitors.map(x=>[String(x.team?.id||x.id||''),x.team?.abbreviation||x.abbreviation||'']));
+        return {event:e,plays:allDrivePlays(s),teamMap};
+      }));
+      const plays=[];
+      const allRecentPlays=[];
+      summaries.forEach(({event,plays:ps,teamMap})=>{
+        ps.slice(-30).forEach(p=>{
+          const cc=comp(event),away=team(cc,'away'),home=team(cc,'home');
+          const teamId=String(p.team?.id||'');
+          allRecentPlays.push({
+            id:String(p.id||p.sequenceNumber||playText(p)),
+            text:playText(p),
+            clock:p.clock?.displayValue||'',
+            period:p.period?.number||event.status?.period||'',
+            teamAbbr:(teamMap&&teamMap[teamId])||p.team?.abbreviation||'',
+            matchup:(away.team?.abbreviation||'')+' @ '+(home.team?.abbreviation||'')
+          });
+        });
+        const eventBig=ps.filter(isBigPlay).slice(-6).reverse();
+        const ticker=document.getElementById('liveGameTicker-'+String(event.id||'').replace(/[^a-zA-Z0-9_-]/g,''));
+        if(ticker){
+          const box=ticker.querySelector('.liveGameTickerItems');
+          if(eventBig.length){
+            const bits=eventBig.map(p=>'<span class="liveGameTickerItem">'+(p.scoringPlay?'🏈 ':'⚡ ')+'<strong>'+esc(p.clock?.displayValue||'')+'</strong> '+esc(playText(p))+'</span>');
+            if(box) box.innerHTML=bits.concat(bits).join('<span class="liveGameTickerItem">•</span>');
+            ticker.classList.add('show');
+          }else{
+            ticker.classList.remove('show');
+          }
+        }
+        ps.filter(isBigPlay).forEach(p=>{
+          const c=comp(event),away=team(c,'away'),home=team(c,'home');
+          plays.push({
+            id:String(p.id||p.sequenceNumber||playText(p)),
+            text:playText(p),
+            clock:p.clock?.displayValue||'',
+            period:p.period?.number||event.status?.period||'',
+            scoring:!!p.scoringPlay,
+            matchup:(away.team?.abbreviation||'')+' @ '+(home.team?.abbreviation||'')
+          });
+        });
+      });
+      const recent=plays.slice(-10).reverse();
+      window.__recentBigPlays=recent;
+      window.__recentNFLPlays=allRecentPlays.slice(-60).reverse();
+      if(!recent.length){
+        bigWrap.classList.add('show');
+        bigItems.innerHTML='<span class="bigPlayItem">Watching for touchdowns, turnovers and explosive plays…</span>';
+        bigList.innerHTML='<div class="meta">No qualifying big plays yet.</div>';
+        bigMeta.textContent=liveEvents.length+' live game'+(liveEvents.length===1?'':'s')+' · monitoring';
+        return;
+      }
+      const tickerEntries=recent.slice(0,6).map(p=>'<span class="bigPlayItem">'+(p.scoring?'🏈 ':'⚡ ')+'<strong>'+esc(p.matchup)+'</strong> — '+esc(p.text)+(p.clock?' • Q'+esc(p.period)+' '+esc(p.clock):'')+'</span>');
+      bigItems.innerHTML=tickerEntries.concat(tickerEntries).join('<span class="bigPlayItem">•</span>');
+      bigList.innerHTML=recent.map(p=>'<div class="bigPlayCard"><div class="bigPlayCardTitle">'+(p.scoring?'🏈 ':'⚡ ')+esc(p.text)+'</div><div class="bigPlayCardMeta">'+esc(p.matchup)+(p.clock?' • Q'+esc(p.period)+' '+esc(p.clock):'')+'</div></div>').join('');
+      bigWrap.classList.add('show');
+      bigMeta.textContent=recent.length+' recent big play'+(recent.length===1?'':'s')+' · updated '+new Date().toLocaleTimeString();
+      if(bigPanelMeta) bigPanelMeta.textContent='Live touchdowns, turnovers and explosive plays from games in progress.';
+      const sig=recent[0].id+'|'+recent[0].text;
+      if(lastBigPlaySignature && sig!==lastBigPlaySignature){
+        bigWrap.animate([{transform:'scale(1)'},{transform:'scale(1.01)'},{transform:'scale(1)'}],{duration:650});
+      }
+      lastBigPlaySignature=sig;
+    }catch(err){
+      bigWrap.classList.add('show');
+      bigMeta.textContent='Big-play feed issue';
+      bigItems.innerHTML='<span class="bigPlayItem">Unable to refresh play-by-play right now.</span>';
+    }
+  }
+  bigBtn?.addEventListener('click',()=>{bigPanel?.classList.toggle('open');if(bigPanel?.classList.contains('open'))bigPanel.scrollIntoView({behavior:'smooth',block:'start'});});
+
+  function renderGame(e){
+    const c=comp(e),away=team(c,'away'),home=team(c,'home'),st=gameState(e);
+    const networks=(c.broadcasts?.[0]?.names||[]).join(' / ');
+    const cls=st==='in'?'in':st==='post'?'post':'pre';
+    const label=st==='in'?'● LIVE':st==='post'?'FINAL':'UPCOMING';
+    const tickerId='liveGameTicker-'+String(e.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+    return '<article class="liveGame '+cls+'" data-event-id="'+esc(e.id||'')+'"><div class="liveStatus">'+label+' · '+esc(detail(e))+'</div>'+
+      '<div class="liveTeamRow"><div class="liveTeam">'+esc(away.team?.displayName||'Away')+'</div><div class="liveScore">'+esc(away.score??'—')+'</div></div>'+
+      '<div class="liveTeamRow"><div class="liveTeam">'+esc(home.team?.displayName||'Home')+'</div><div class="liveScore">'+esc(home.score??'—')+'</div></div>'+
+      '<div class="liveDetails">'+esc(networks||'NFL')+(c.venue?.fullName?' · '+esc(c.venue.fullName):'')+'</div>'+
+      '<div id="'+tickerId+'" class="liveGameTicker"><div class="liveGameTickerLabel">Game Big Plays</div><div class="liveGameTickerTrack"><div class="liveGameTickerItems"></div></div></div></article>';
+  }
+  async function loadLive(){
+    try{
+      const r=await fetch(espnUrl(),{cache:'no-store'});
+      if(!r.ok) throw new Error('ESPN returned '+r.status);
+      const data=await r.json(),events=Array.isArray(data.events)?data.events:[],live=events.filter(e=>gameState(e)==='in');
+      loadBigPlays(live);
+      const liveMap={};
+      live.forEach(e=>{
+        const cc=comp(e),a=team(cc,'away'),h=team(cc,'home');
+        const aAb=normEspnAbbr(a.team?.abbreviation||a.team?.shortDisplayName||'');
+        const hAb=normEspnAbbr(h.team?.abbreviation||h.team?.shortDisplayName||'');
+        const key=[aAb,hAb].filter(Boolean).sort().join('|');
+        if(key) liveMap[key]={
+          awayName:a.team?.displayName||'Away',homeName:h.team?.displayName||'Home',
+          awayScore:a.score??'—',homeScore:h.score??'—',status:detail(e)||'In Progress'
+        };
+      });
+      window.__liveNFLGames=liveMap;
+      grid.innerHTML=events.map(renderGame).join('')||'<div class="meta">No NFL games scheduled today.</div>';
+      meta.textContent=events.length+' game'+(events.length===1?'':'s')+' today · '+live.length+' live · updated '+new Date().toLocaleTimeString();
+
+      // Keep the main Week hero synchronized with the live ESPN feed.
+      if(live.length){
+        const e=live[0], c=comp(e), away=team(c,'away'), home=team(c,'home');
+        window.__liveNFLHero={
+          awayName:away.team?.displayName||'Away',
+          homeName:home.team?.displayName||'Home',
+          awayScore:away.score??'—',
+          homeScore:home.score??'—',
+          status:detail(e)||'In Progress',
+          networks:(c.broadcasts?.[0]?.names||[]).join(' / '),
+          venue:c.venue?.fullName||''
+        };
+      } else {
+        window.__liveNFLHero=null;
+      }
+      if(typeof renderNextEvent==='function') renderNextEvent();
+      if(typeof renderGames==='function' && typeof weeks!=='undefined' && weeks[currentWeek]){
+        const w=weeks[currentWeek],q=$('search').value.toLowerCase(),net=$('networkFilter').value,primeOnly=$('primeFilter').checked;
+        const filtered=w.games.filter(g=>(!q||gameText(g).includes(q))&&(!net||cleanNet(g[3])===net)&&(!primeOnly||isPrimeOrSpecial(g)));
+        if(!net) renderGames(filtered,w);
+      }
+
+      if(live.length){
+        nav.classList.add('show');
+        btnText.textContent='LIVE SCOREBOARD · '+live.length+' GAME'+(live.length===1?'':'S')+' IN PROGRESS';
+        if(!panel.dataset.openedOnce){panel.classList.add('open');panel.dataset.openedOnce='1';}
+        if(!liveTimer) liveTimer=setInterval(loadLive,20000);
+      }else{
+        nav.classList.remove('show');
+        if(liveTimer){clearInterval(liveTimer);liveTimer=null;}
+      }
+    }catch(err){
+      nav.classList.add('show');
+      btnText.textContent='SCOREBOARD FEED STATUS';
+      panel.classList.add('open');
+      grid.innerHTML='<div class="meta">Live score feed could not be reached from this browser.</div>';
+      meta.textContent=err.message+' · '+new Date().toLocaleTimeString();
+    }
+  }
+  btn.addEventListener('click',()=>{panel.classList.toggle('open'); if(panel.classList.contains('open')) panel.scrollIntoView({behavior:'smooth',block:'start'});});
+  refresh?.addEventListener('click',loadLive);
+  loadLive();
+})();
+</script>
+
+
+<script>
+(function(){
+  const ENDPOINT='https://octoberfest-ftrip-fantasyfb.kjlandry.workers.dev/';
+  const ticker=document.getElementById('fantasyTicker'), tickerItems=document.getElementById('fantasyTickerItems'),
+    tickerMeta=document.getElementById('fantasyTickerMeta'), tickerBtn=document.getElementById('fantasyTickerBtn'),
+    panel=document.getElementById('fantasyPanel'), grid=document.getElementById('fantasyGrid'),
+    meta=document.getElementById('fantasyMeta'), refresh=document.getElementById('fantasyRefresh'),
+    impactWrap=document.getElementById('fantasyImpactWrap'), impactItems=document.getElementById('fantasyImpactItems'), impactScores=document.getElementById('fantasyImpactScores'), impactMeta=document.getElementById('fantasyImpactMeta');
+  if(!ticker||!panel||!grid) return;
+  let timer=null;
+  let previousPlayerPoints={};
+  let impactHistory=[];
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function rec(team){
+    const r=team?.record||{};
+    return [r.wins??0,r.losses??0,(r.ties??0)||null].filter(v=>v!==null).join('-');
+  }
+  function score(v){const n=Number(v??0);return Number.isFinite(n)?n.toFixed(1):'0.0'}
+  function sideHtml(side){
+    if(!side)return '';
+    const img=side.logo?'<img class="fantasyLogo" src="'+esc(side.logo)+'" alt="">':'<div class="fantasyLogo"></div>';
+    const proj=side.projected==null?'':'<div class="fantasyProjected">Proj '+score(side.projected)+'</div>';
+    return '<div class="fantasyMatchRow">'+img+'<div><div class="fantasyTeamName">'+esc(side.name)+'</div><div class="fantasyRecord">'+esc(rec(side))+'</div></div><div><div class="fantasyScore">'+score(side.score)+'</div>'+proj+'</div></div>';
+  }
+  function teamNameById(teams,id){return teams[id]?.name||('Team '+id)}
+  function findRecentPlayForPlayer(name){
+    const plays=window.__recentNFLPlays||[];
+    const n=String(name||'').trim().toLowerCase();
+    if(!n) return null;
+    const parts=n.split(/\s+/),first=parts[0]||'',last=parts[parts.length-1]||'';
+    const initial=first ? first[0] : '';
+    return plays.find(p=>{
+      const t=String(p.text||'').toLowerCase();
+      const normalized=t.replace(/[.]/g,' ');
+      return t.includes(n) ||
+        normalized.includes(n) ||
+        (last.length>3 && normalized.includes(last) &&
+          (!initial || normalized.includes(initial+' '+last) || t.includes(initial+'.'+last)));
+    })||null;
+  }
+  function compactPlayerPlay(playerName,play){
+    const raw=String(play?.text||'');
+    const team=play?.teamAbbr ? ' '+play.teamAbbr : '';
+    const parts=String(playerName||'Player').trim().split(/\s+/);
+    const short=(parts.length>1 ? parts[0][0]+' '+parts.slice(-1)[0] : parts[0])+team;
+    const low=raw.toLowerCase();
+    const yards=(raw.match(/for\s+(-?\d+)\s+yard/i)||raw.match(/(-?\d+)\s+yard/i)||[])[1];
+    if(/touchdown/.test(low)){
+      if(/pass/.test(low) && /complete|to /.test(low)) return short+' • TD reception'+(yards?' '+yards+' yds':'');
+      if(/rush|left end|right end|left tackle|right tackle|up the middle|guard/.test(low)) return short+' • rushing TD'+(yards?' '+yards+' yds':'');
+      return short+' • TOUCHDOWN';
+    }
+    if(/pass.*(?:complete| to )/.test(low)) return short+' • reception'+(yards?' '+yards+' yds':'');
+    if(/rush|left end|right end|left tackle|right tackle|up the middle|guard/.test(low)) return short+' • rush'+(yards?' '+yards+' yds':'');
+    return short+' • '+raw;
+  }
+  function renderFantasyImpact(players,teams){
+    if(!impactWrap||!impactItems||!impactMeta||!Array.isArray(players)) return;
+    const nowMap={};
+    const fresh=[];
+    players.forEach(p=>{
+      const pts=Number(p.points??p.appliedStatTotal??0);
+      nowMap[p.id]=pts;
+      if(Object.prototype.hasOwnProperty.call(previousPlayerPoints,p.id)){
+        const delta=pts-Number(previousPlayerPoints[p.id]||0);
+        if(Math.abs(delta)>=0.05){
+          const play=findRecentPlayForPlayer(p.name);
+          fresh.push({
+            key:String(p.id)+'|'+String(pts)+'|'+String(play?.id||play?.text||'score'),
+            name:p.name||'Player',
+            team:teamNameById(teams,p.teamId),
+            delta,
+            total:pts,
+            play:play?.text||'',
+            playLabel:play?compactPlayerPlay(p.name,play):((p.name||'Player')+' • fantasy score update')
+          });
+        }
+      }
+    });
+    previousPlayerPoints=nowMap;
+    fresh.forEach(x=>{
+      if(!impactHistory.some(h=>h.key===x.key)) impactHistory.unshift(x);
+    });
+    impactHistory=impactHistory.slice(0,12);
+    const active=players
+      .map(p=>({
+        name:p.name||'Player',
+        team:teamNameById(teams,p.teamId),
+        pts:Number(p.points??p.appliedStatTotal??0)
+      }))
+      .filter(p=>p.pts>0)
+      .sort((a,b)=>b.pts-a.pts)
+      .slice(0,14);
+
+    if(impactHistory.length){
+      const x=impactHistory[0];
+      const latest='<span class="fantasyImpactItem">🚨 <strong>'+esc(x.playLabel||x.name)+'</strong> — '+(x.delta>=0?'+':'')+score(x.delta)+' pts • '+score(x.total)+' total • '+esc(x.team)+'</span>';
+      impactItems.innerHTML=latest+'<span class="fantasyImpactItem">•</span>'+latest;
+      requestAnimationFrame(()=>{
+        const distance=Math.max(impactItems.scrollWidth/2,320);
+        const pxPerSecond=34;
+        impactItems.style.animationDuration=(distance/pxPerSecond).toFixed(1)+'s';
+      });
+      impactMeta.textContent='Latest fantasy scoring update • holds until a new score arrives';
+    }else{
+      impactItems.innerHTML='<span class="fantasyImpactItem">Watching for the next rostered-player fantasy scoring change…</span>';
+      impactItems.style.animationDuration='18s';
+      impactMeta.textContent='Breaking fantasy scoring monitor';
+    }
+
+    if(impactScores){
+      if(active.length){
+        const totals=active.map(p=>'<span class="fantasyImpactItem">🏈 <strong>'+esc(p.name)+'</strong> • '+score(p.pts)+' pts • '+esc(p.team)+'</span>');
+        impactScores.innerHTML=totals.concat(totals).join('<span class="fantasyImpactItem">•</span>');
+      }else{
+        impactScores.innerHTML='<span class="fantasyImpactItem">No rostered players have scored yet.</span>';
+      }
+    }
+    impactWrap.classList.add('show');
+  }
+
+  async function loadFantasy(){
+    try{
+      const r=await fetch(ENDPOINT,{cache:'no-store'});
+      if(!r.ok) throw new Error('Fantasy feed returned '+r.status);
+      const d=await r.json();
+      if(!d.ok) throw new Error(d.error||'Fantasy feed unavailable');
+      const teams=Object.fromEntries((d.teams||[]).map(t=>[t.id,t]));
+      const matchups=d.matchups||[];
+      renderFantasyImpact(d.players||[],teams);
+      const items=matchups.map(m=>{
+        const a=m.away||{},h=m.home||{};
+        return '<span class="fantasyTickItem"><strong>'+esc(a.name)+'</strong> '+score(a.score)+' — <strong>'+esc(h.name)+'</strong> '+score(h.score)+'</span>';
+      });
+      const doubled=items.concat(items);
+      tickerItems.innerHTML=doubled.join('<span class="fantasyTickItem">•</span>');
+      grid.innerHTML=matchups.map(m=>'<article class="fantasyMatch">'+sideHtml(m.away)+sideHtml(m.home)+'</article>').join('')||'<div class="meta">No current fantasy matchups returned.</div>';
+      tickerMeta.textContent='Week '+(d.currentMatchupPeriod??'')+' · updated '+new Date(d.fetchedAt||Date.now()).toLocaleTimeString();
+      meta.textContent=(d.league?.name||'Stadium Chasers Fantasy')+' · Week '+(d.currentMatchupPeriod??'')+' · '+matchups.length+' matchup'+(matchups.length===1?'':'s');
+      ticker.classList.add('show');
+      if(!timer) timer=setInterval(loadFantasy,15000);
+    }catch(err){
+      ticker.classList.add('show');
+      tickerMeta.textContent='Feed issue';
+      tickerItems.innerHTML='<span class="fantasyTickItem">'+esc(err.message)+'</span>';
+      meta.textContent=err.message;
+      grid.innerHTML='<div class="meta">Fantasy data could not be loaded.</div>';
+    }
+  }
+  tickerBtn?.addEventListener('click',()=>{panel.classList.toggle('open');if(panel.classList.contains('open'))panel.scrollIntoView({behavior:'smooth',block:'start'});});
+  refresh?.addEventListener('click',loadFantasy);
+  loadFantasy();
+})();
+</script>
+
+</body>
+</html>
