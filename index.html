@@ -213,7 +213,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v34.2</div>
+    <div class="ver" id="cornerVersion">v34.3</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -435,11 +435,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '34.2',
+  version: '34.3',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • FF Player Live ticker enabled',
+  lastUpdated: 'October 4, 2026 • FF Player Live now tracks individual fantasy point plays',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -927,10 +927,25 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
         const r=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event='+encodeURIComponent(e.id),{cache:'no-store'});
         if(!r.ok) return {event:e,plays:[]};
         const s=await r.json();
-        return {event:e,plays:allDrivePlays(s)};
+        const competitors=s?.header?.competitions?.[0]?.competitors||[];
+        const teamMap=Object.fromEntries(competitors.map(x=>[String(x.team?.id||x.id||''),x.team?.abbreviation||x.abbreviation||'']));
+        return {event:e,plays:allDrivePlays(s),teamMap};
       }));
       const plays=[];
-      summaries.forEach(({event,plays:ps})=>{
+      const allRecentPlays=[];
+      summaries.forEach(({event,plays:ps,teamMap})=>{
+        ps.slice(-30).forEach(p=>{
+          const cc=comp(event),away=team(cc,'away'),home=team(cc,'home');
+          const teamId=String(p.team?.id||'');
+          allRecentPlays.push({
+            id:String(p.id||p.sequenceNumber||playText(p)),
+            text:playText(p),
+            clock:p.clock?.displayValue||'',
+            period:p.period?.number||event.status?.period||'',
+            teamAbbr:(teamMap&&teamMap[teamId])||p.team?.abbreviation||'',
+            matchup:(away.team?.abbreviation||'')+' @ '+(home.team?.abbreviation||'')
+          });
+        });
         const eventBig=ps.filter(isBigPlay).slice(-6).reverse();
         const ticker=document.getElementById('liveGameTicker-'+String(event.id||'').replace(/[^a-zA-Z0-9_-]/g,''));
         if(ticker){
@@ -957,6 +972,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       });
       const recent=plays.slice(-10).reverse();
       window.__recentBigPlays=recent;
+      window.__recentNFLPlays=allRecentPlays.slice(-60).reverse();
       if(!recent.length){
         bigWrap.classList.add('show');
         bigItems.innerHTML='<span class="bigPlayItem">Watching for touchdowns, turnovers and explosive plays…</span>';
@@ -1087,15 +1103,36 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
     return '<div class="fantasyMatchRow">'+img+'<div><div class="fantasyTeamName">'+esc(side.name)+'</div><div class="fantasyRecord">'+esc(rec(side))+'</div></div><div><div class="fantasyScore">'+score(side.score)+'</div>'+proj+'</div></div>';
   }
   function teamNameById(teams,id){return teams[id]?.name||('Team '+id)}
-  function findRecentBigPlayForPlayer(name){
-    const plays=window.__recentBigPlays||[];
-    const n=String(name||'').toLowerCase();
+  function findRecentPlayForPlayer(name){
+    const plays=window.__recentNFLPlays||[];
+    const n=String(name||'').trim().toLowerCase();
     if(!n) return null;
-    const last=n.split(' ').slice(-1)[0];
+    const parts=n.split(/\s+/),first=parts[0]||'',last=parts[parts.length-1]||'';
+    const initial=first ? first[0] : '';
     return plays.find(p=>{
       const t=String(p.text||'').toLowerCase();
-      return t.includes(n) || (last.length>3 && t.includes(last));
+      const normalized=t.replace(/[.]/g,' ');
+      return t.includes(n) ||
+        normalized.includes(n) ||
+        (last.length>3 && normalized.includes(last) &&
+          (!initial || normalized.includes(initial+' '+last) || t.includes(initial+'.'+last)));
     })||null;
+  }
+  function compactPlayerPlay(playerName,play){
+    const raw=String(play?.text||'');
+    const team=play?.teamAbbr ? ' '+play.teamAbbr : '';
+    const parts=String(playerName||'Player').trim().split(/\s+/);
+    const short=(parts.length>1 ? parts[0][0]+' '+parts.slice(-1)[0] : parts[0])+team;
+    const low=raw.toLowerCase();
+    const yards=(raw.match(/for\s+(-?\d+)\s+yard/i)||raw.match(/(-?\d+)\s+yard/i)||[])[1];
+    if(/touchdown/.test(low)){
+      if(/pass/.test(low) && /complete|to /.test(low)) return short+' • TD reception'+(yards?' '+yards+' yds':'');
+      if(/rush|left end|right end|left tackle|right tackle|up the middle|guard/.test(low)) return short+' • rushing TD'+(yards?' '+yards+' yds':'');
+      return short+' • TOUCHDOWN';
+    }
+    if(/pass.*(?:complete| to )/.test(low)) return short+' • reception'+(yards?' '+yards+' yds':'');
+    if(/rush|left end|right end|left tackle|right tackle|up the middle|guard/.test(low)) return short+' • rush'+(yards?' '+yards+' yds':'');
+    return short+' • '+raw;
   }
   function renderFantasyImpact(players,teams){
     if(!impactWrap||!impactItems||!impactMeta||!Array.isArray(players)) return;
@@ -1106,15 +1143,16 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       nowMap[p.id]=pts;
       if(Object.prototype.hasOwnProperty.call(previousPlayerPoints,p.id)){
         const delta=pts-Number(previousPlayerPoints[p.id]||0);
-        if(delta>=2){
-          const play=findRecentBigPlayForPlayer(p.name);
+        if(Math.abs(delta)>=0.05){
+          const play=findRecentPlayForPlayer(p.name);
           if(play){
             fresh.push({
               key:String(p.id)+'|'+String(play.id||play.text),
               name:p.name||'Player',
               team:teamNameById(teams,p.teamId),
               delta,
-              play:play.text||''
+              play:play.text||'',
+              playLabel:compactPlayerPlay(p.name,play)
             });
           }
         }
@@ -1146,7 +1184,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       impactWrap.classList.add('show');
       return;
     }
-    const bits=impactHistory.slice(0,8).map(x=>'<span class="fantasyImpactItem">🔥 <strong>'+esc(x.name)+'</strong> • '+esc(x.team)+' • +'+score(x.delta)+' pts • '+esc(x.play)+'</span>');
+    const bits=impactHistory.slice(0,10).map(x=>'<span class="fantasyImpactItem">🏈 <strong>'+esc(x.playLabel||x.name)+'</strong> — '+(x.delta>=0?'+':'')+score(x.delta)+' pts • '+esc(x.team)+'</span>');
     impactItems.innerHTML=bits.concat(bits).join('<span class="fantasyImpactItem">•</span>');
     impactMeta.textContent=impactHistory.length+' recent fantasy impact'+(impactHistory.length===1?'':'s');
     impactWrap.classList.add('show');
@@ -1171,7 +1209,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       tickerMeta.textContent='Week '+(d.currentMatchupPeriod??'')+' · updated '+new Date(d.fetchedAt||Date.now()).toLocaleTimeString();
       meta.textContent=(d.league?.name||'Stadium Chasers Fantasy')+' · Week '+(d.currentMatchupPeriod??'')+' · '+matchups.length+' matchup'+(matchups.length===1?'':'s');
       ticker.classList.add('show');
-      if(!timer) timer=setInterval(loadFantasy,30000);
+      if(!timer) timer=setInterval(loadFantasy,15000);
     }catch(err){
       ticker.classList.add('show');
       tickerMeta.textContent='Feed issue';
