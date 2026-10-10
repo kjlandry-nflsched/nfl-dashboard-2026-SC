@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v35</div>
+    <div class="ver" id="cornerVersion">v36</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -305,15 +305,15 @@ body.dark .game.tripGame{border-color:#fbbf24}
   
   <section id="standingsPanel" class="card standingsShell" aria-label="NFL Standings Center">
     <div class="standingsHeader">
-      <div><div class="nextLabel">Version 26 Feature</div><h2 class="standingsTitle">🏆 NFL Standings Center</h2><div class="standingsSub">Current division standings through October 1, 2026. Click any team to open its full Week 1–18 schedule with completed results and upcoming games.</div></div>
-      <span class="pill">Updated through Week 4 TNF</span>
+      <div><div class="nextLabel">Live NFL Data</div><h2 class="standingsTitle">🏆 NFL Standings Center</h2><div class="standingsSub">Current NFL division standings auto-update from ESPN. Click any team to open its full Week 1–18 schedule with completed results and upcoming games.</div></div>
+      <span id="standingsUpdatedPill" class="pill">Connecting to live standings…</span>
     </div>
     <div class="standingsControls">
       <button type="button" class="active" data-conf="ALL">All NFL</button><button type="button" data-conf="AFC">AFC</button><button type="button" data-conf="NFC">NFC</button>
       <input id="standingsSearch" class="search" style="max-width:360px" placeholder="Find a team in standings..."/>
     </div>
     <div id="standingsGrid" class="standingsGrid"></div>
-    <div class="standingsNote">Standings are a static snapshot tied to the scores loaded in this dashboard. Division ordering for tied records reflects the NFL standings snapshot used for this V17 update.</div>
+    <div id="standingsLiveNote" class="standingsNote">Live standings refresh automatically about every 5 minutes. If the ESPN feed is unavailable, the dashboard falls back to records calculated from loaded game results.</div>
     <section id="standingsTeamDrawer" class="teamScheduleDrawer" aria-label="Selected team season schedule"></section>
   </section>
 
@@ -445,11 +445,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '35',
+  version: '36',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 4, 2026 • Roman final NFL stadium tribute added',
+  lastUpdated: 'October 9, 2026 • NFL standings now auto-update live from ESPN',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -787,9 +787,72 @@ const officialStandingsOrder={
  'NFC West':['49ers','seahawks','rams','cardinals']
 };
 let standingsConference='ALL';
-function standingsStats(key){let w=0,l=0,t=0,pf=0,pa=0,divW=0,divL=0,divT=0;const seq=[];weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];pf+=a;pa+=b;let r='T';if(a>b){w++;r='W'}else if(a<b){l++;r='L'}else t++;seq.push(r);const opp=teams[1-idx];if(teamDivisions[opp]===teamDivisions[key]){if(r==='W')divW++;else if(r==='L')divL++;else divT++;}}));const games=w+l+t;const pct=games?((w+.5*t)/games):0;let streak='-';if(seq.length){const last=seq[seq.length-1];let n=0;for(let i=seq.length-1;i>=0&&seq[i]===last;i--)n++;streak=`${n}${last}`;}return {w,l,t,pf,pa,diff:pf-pa,pct,div:`${divW}-${divL}${divT?'-'+divT:''}`,streak,text:`${w}-${l}${t?'-'+t:''}`};}
+let liveStandingsByKey={};
+let liveStandingsLoadedAt=null;
+let liveStandingsTimer=null;
+
+function standingsKeyFromAbbr(abbr){
+  const a=String(abbr||'').toUpperCase();
+  const map={ARI:'cardinals',ATL:'falcons',BAL:'ravens',BUF:'bills',CAR:'panthers',CHI:'bears',CIN:'bengals',CLE:'browns',DAL:'cowboys',DEN:'broncos',DET:'lions',GB:'packers',HOU:'texans',IND:'colts',JAX:'jaguars',JAC:'jaguars',KC:'chiefs',LV:'raiders',LAC:'chargers',LAR:'rams',LA:'rams',MIA:'dolphins',MIN:'vikings',NE:'patriots',NO:'saints',NYG:'giants',NYJ:'jets',PHI:'eagles',PIT:'steelers',SEA:'seahawks',SF:'49ers',TB:'buccaneers',TEN:'titans',WAS:'commanders',WSH:'commanders'};
+  return map[a]||null;
+}
+function standingsStat(stats,name){
+  const s=(stats||[]).find(x=>String(x.name||'').toLowerCase()===String(name).toLowerCase());
+  return s ? (s.value ?? s.displayValue ?? null) : null;
+}
+function collectStandingEntries(node,out=[]){
+  if(node?.standings?.entries?.length) out.push(...node.standings.entries);
+  (node?.children||[]).forEach(ch=>collectStandingEntries(ch,out));
+  return out;
+}
+async function loadLiveStandings(forceRender=true){
+  const pill=$('standingsUpdatedPill'), note=$('standingsLiveNote');
+  try{
+    if(pill) pill.textContent='Updating live standings…';
+    const url='https://site.api.espn.com/apis/v2/sports/football/nfl/standings?region=us&lang=en&season=2026&type=2&limit=100';
+    const r=await fetch(url,{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const entries=collectStandingEntries(d,[]);
+    const next={};
+    entries.forEach(e=>{
+      const key=standingsKeyFromAbbr(e?.team?.abbreviation);
+      if(!key) return;
+      const stats=e.stats||[];
+      const wins=Number(standingsStat(stats,'wins')??0);
+      const losses=Number(standingsStat(stats,'losses')??0);
+      const ties=Number(standingsStat(stats,'ties')??0);
+      const pctRaw=standingsStat(stats,'winPercent');
+      const pf=Number(standingsStat(stats,'pointsFor')??0);
+      const pa=Number(standingsStat(stats,'pointsAgainst')??0);
+      const diffRaw=standingsStat(stats,'differential');
+      const divRec=standingsStat(stats,'divisionRecord');
+      const streak=standingsStat(stats,'streak');
+      next[key]={
+        w:wins,l:losses,t:ties,
+        pct:pctRaw==null?((wins+.5*ties)/Math.max(1,wins+losses+ties)):Number(pctRaw),
+        pf,pa,diff:diffRaw==null?(pf-pa):Number(diffRaw),
+        div:divRec==null?'-':String(divRec),
+        streak:streak==null?'-':String(streak),
+        text:`${wins}-${losses}${ties?'-'+ties:''}`
+      };
+    });
+    if(Object.keys(next).length<28) throw new Error('Incomplete standings response');
+    liveStandingsByKey=next;
+    liveStandingsLoadedAt=new Date();
+    if(pill) pill.textContent='Live • updated '+liveStandingsLoadedAt.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    if(note) note.textContent='Live ESPN standings • automatic refresh every 5 minutes • '+Object.keys(next).length+' teams loaded.';
+    if(forceRender) renderStandings();
+  }catch(err){
+    if(pill) pill.textContent='Standings fallback active';
+    if(note) note.textContent='Live standings feed unavailable right now; showing records calculated from loaded dashboard results.';
+    if(forceRender) renderStandings();
+  }
+  if(!liveStandingsTimer) liveStandingsTimer=setInterval(()=>loadLiveStandings(true),300000);
+}
+function standingsStats(key){if(liveStandingsByKey[key]) return liveStandingsByKey[key]; let w=0,l=0,t=0,pf=0,pa=0,divW=0,divL=0,divT=0;const seq=[];weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];pf+=a;pa+=b;let r='T';if(a>b){w++;r='W'}else if(a<b){l++;r='L'}else t++;seq.push(r);const opp=teams[1-idx];if(teamDivisions[opp]===teamDivisions[key]){if(r==='W')divW++;else if(r==='L')divL++;else divT++;}}));const games=w+l+t;const pct=games?((w+.5*t)/games):0;let streak='-';if(seq.length){const last=seq[seq.length-1];let n=0;for(let i=seq.length-1;i>=0&&seq[i]===last;i--)n++;streak=`${n}${last}`;}return {w,l,t,pf,pa,diff:pf-pa,pct,div:`${divW}-${divL}${divT?'-'+divT:''}`,streak,text:`${w}-${l}${t?'-'+t:''}`};}
 function standingRow(key,rank){const st=standingsStats(key);const diffClass=st.diff>0?'diffPos':st.diff<0?'diffNeg':'';const pct=st.pct.toFixed(3).replace(/^0/,'');return `<tr class="standingsTeamRow" data-team="${key}" title="Open ${teamName(key)} season schedule"><td><div class="standingsTeam"><span class="standingRank">${rank}</span>${teamPill(key,true)}<span>${teamName(key)}</span></div></td><td class="standingRecord">${st.w}</td><td>${st.l}</td><td>${st.t}</td><td>${pct}</td><td>${st.pf}</td><td>${st.pa}</td><td class="${diffClass}">${st.diff>0?'+':''}${st.diff}</td><td>${st.div}</td><td>${st.streak}</td></tr>`;}
-function divisionMarkup(div){const teams=officialStandingsOrder[div]||[];const body=teams.map((k,i)=>standingRow(k,i+1)).join('');return `<section class="divisionCard" data-division="${div}"><div class="divisionHead"><span>${div}</span><span class="clickHint">Click team → full schedule</span></div><div style="overflow:auto"><table class="standingsTable"><thead><tr><th>Team</th><th>W</th><th>L</th><th>T</th><th>PCT</th><th>PF</th><th>PA</th><th>DIFF</th><th>DIV</th><th>STRK</th></tr></thead><tbody>${body}</tbody></table></div></section>`;}
+function divisionMarkup(div){const teams=[...(officialStandingsOrder[div]||[])].sort((a,b)=>{const A=standingsStats(a),B=standingsStats(b);return (B.pct-A.pct)||(B.w-A.w)||(B.diff-A.diff)||(B.pf-A.pf);});const body=teams.map((k,i)=>standingRow(k,i+1)).join('');return `<section class="divisionCard" data-division="${div}"><div class="divisionHead"><span>${div}</span><span class="clickHint">Click team → full schedule</span></div><div style="overflow:auto"><table class="standingsTable"><thead><tr><th>Team</th><th>W</th><th>L</th><th>T</th><th>PCT</th><th>PF</th><th>PA</th><th>DIFF</th><th>DIV</th><th>STRK</th></tr></thead><tbody>${body}</tbody></table></div></section>`;}
 function renderStandings(){const grid=$('standingsGrid');if(!grid)return;const q=($('standingsSearch')?.value||'').trim().toLowerCase();const conferences=['AFC','NFC'].filter(c=>standingsConference==='ALL'||standingsConference===c);grid.innerHTML=conferences.map(conf=>{const divs=Object.keys(officialStandingsOrder).filter(d=>d.startsWith(conf)).filter(d=>!q||(officialStandingsOrder[d]||[]).some(k=>teamName(k).toLowerCase().includes(q)||teamAbbr(k).toLowerCase().includes(q)));return `<div class="conferenceBoard"><div class="conferenceTitle">${conf==='AFC'?'American Football Conference':'National Football Conference'}</div>${divs.map(divisionMarkup).join('')||'<div class="meta">No teams match that search.</div>'}</div>`;}).join('');grid.querySelectorAll('.standingsTeamRow').forEach(r=>r.addEventListener('click',()=>openStandingsTeam(r.dataset.team)));}
 function resultForTeam(key,g){const sc=scoreFor(g);if(!sc)return null;const teams=teamsInGame(g),idx=teams.indexOf(key);if(idx<0)return null;const a=sc[idx],b=sc[1-idx];return {for:a,against:b,outcome:a>b?'W':a<b?'L':'T'};}
 function openStandingsTeam(key){const drawer=$('standingsTeamDrawer');const st=standingsStats(key);const games=allGamesDated().filter(x=>teamMatchesGame(key,x.game));drawer.innerHTML=`<div class="drawerTop"><div><div class="nextLabel">Season Schedule</div><div class="drawerTitle">${teamPill(key)} ${teamName(key)}</div><div class="drawerRecord">${st.text} • ${teamDivisions[key]} • PF ${st.pf} / PA ${st.pa}</div></div><button type="button" class="drawerBack" id="closeStandingsTeam">Close Team Schedule</button></div><div class="scheduleResultGrid">${games.map(x=>{const r=resultForTeam(key,x.game);const cls=r?`final${r.outcome==='W'?'Win':r.outcome==='L'?'Loss':'Tie'}`:'';const status=r?`<div class="scheduleStatus ${r.outcome==='W'?'win':r.outcome==='L'?'loss':'tie'}">${r.outcome} • ${r.for}-${r.against} FINAL</div>`:`<div class="scheduleStatus">Upcoming • ${x.game[1]} ${x.game[2]} • ${x.game[3]}</div>`;const gameIdx=(weeks.find(w=>w.week===x.week)?.games||[]).indexOf(x.game);const boxBtn=r&&gameIdx>=0?`<button class="boxScoreBtn" type="button" onclick="openBoxScoreForGame(${x.week},${gameIdx})">BOX SCORE ›</button>`:'';return `<article class="scheduleResultCard ${cls}"><div class="wk">Week ${x.week}</div><div class="homeAway">${homeAwayFor(key,x.game)}</div><div class="match">${x.game[0]}</div>${status}${boxBtn?`<div class="details" style="margin-top:9px">${boxBtn}</div>`:''}<div class="meta" style="margin-top:7px">${x.range}</div></article>`;}).join('')}</div>`;drawer.classList.add('active');$('closeStandingsTeam').onclick=()=>{drawer.classList.remove('active');drawer.innerHTML='';};drawer.scrollIntoView({behavior:'smooth',block:'start'});}
@@ -832,7 +895,7 @@ const stadiumAttendance=[
 ]
 function hideSpecialPanels(){if($('stadiumAttendancePanel'))$('stadiumAttendancePanel').style.display='none';if($('standingsPanel'))$('standingsPanel').style.display='none';}
 function showStadiumAttendance(){document.body.classList.add('hideMainDashboard');hideSpecialPanels();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('stadiumTopTab').classList.add('active');$('stadiumAttendancePanel').style.display='block';renderStadiumAttendance();window.scrollTo({top:0,behavior:'smooth'});} 
-function showStandings(){document.body.classList.add('hideMainDashboard');hideSpecialPanels();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('standingsTopTab').classList.add('active');$('standingsPanel').style.display='block';renderStandings();window.scrollTo({top:0,behavior:'smooth'});} 
+function showStandings(){document.body.classList.add('hideMainDashboard');hideSpecialPanels();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('standingsTopTab').classList.add('active');$('standingsPanel').style.display='block';renderStandings();loadLiveStandings(true);window.scrollTo({top:0,behavior:'smooth'});} 
 function showScheduleDashboard(){document.body.classList.remove('hideMainDashboard');hideSpecialPanels();}
 function renderStadiumTab(){const tabs=$('tabs');if(!tabs||$('stadiumTopTab'))return;const b=document.createElement('button');b.id='stadiumTopTab';b.type='button';b.className='tab stadiumTabButton';b.innerHTML='<div class="w">🏟️ Stadium Attendance</div><div class="starts">Group List</div><div class="cd">Member Views</div>';b.onclick=showStadiumAttendance;tabs.appendChild(b);} 
 function renderStandingsTab(){const tabs=$('tabs');if(!tabs||$('standingsTopTab'))return;const b=document.createElement('button');b.id='standingsTopTab';b.type='button';b.className='tab standingsTabButton';b.innerHTML='<span class="newBadge">NEW</span><div class="w">🏆 NFL Standings</div><div class="starts">AFC + NFC</div><div class="cd">Team Schedules</div>';b.onclick=showStandings;tabs.appendChild(b);} 
@@ -884,7 +947,7 @@ function renderBuckets(){const member=selectedStadiumMember()||'Kenny';const nob
 function renderStadiumAttendance(){initStadiumFilters();renderMemberSpotlight();const rows=filteredStadiumRows();renderStadiumStats(rows);renderLeaderboard();renderMiniMap();renderStadiumTable(rows);renderBuckets();}
 
 $('boxScoreClose').addEventListener('click',closeBoxScore);$('boxScoreModal').addEventListener('click',e=>{if(e.target===$('boxScoreModal'))closeBoxScore();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBoxScore();});
-renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsControls();applyTheme(localStorage.getItem('nflDashTheme')||'dark');render();
+renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsControls();loadLiveStandings(false);applyTheme(localStorage.getItem('nflDashTheme')||'dark');render();
 </script>
 
 <script>
