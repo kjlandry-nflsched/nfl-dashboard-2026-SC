@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v36</div>
+    <div class="ver" id="cornerVersion">v36.1</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -445,11 +445,11 @@ function scoreFor(g){return completedScores[g[0]]||null;}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '36',
+  version: '36.1',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 9, 2026 • NFL standings now auto-update live from ESPN',
+  lastUpdated: 'October 9, 2026 • Live standings PF and PA fixed',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -797,8 +797,25 @@ function standingsKeyFromAbbr(abbr){
   return map[a]||null;
 }
 function standingsStat(stats,name){
-  const s=(stats||[]).find(x=>String(x.name||'').toLowerCase()===String(name).toLowerCase());
+  const wanted=String(name||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const s=(stats||[]).find(x=>{
+    const n=String(x.name||x.abbreviation||x.displayName||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    return n===wanted;
+  });
   return s ? (s.value ?? s.displayValue ?? null) : null;
+}
+function dashboardPointTotals(key){
+  let pf=0,pa=0,games=0;
+  weeks.forEach(week=>week.games.forEach(g=>{
+    const sc=scoreFor(g);
+    if(!sc||!teamMatchesGame(key,g)) return;
+    const teams=teamsInGame(g),idx=teams.indexOf(key);
+    if(idx<0) return;
+    pf+=Number(sc[idx])||0;
+    pa+=Number(sc[1-idx])||0;
+    games++;
+  }));
+  return {pf,pa,games};
 }
 function collectStandingEntries(node,out=[]){
   if(node?.standings?.entries?.length) out.push(...node.standings.entries);
@@ -823,20 +840,27 @@ async function loadLiveStandings(forceRender=true){
       const losses=Number(standingsStat(stats,'losses')??0);
       const ties=Number(standingsStat(stats,'ties')??0);
       const pctRaw=standingsStat(stats,'winPercent');
-      const pf=Number(standingsStat(stats,'pointsFor')??0);
-      const pa=Number(standingsStat(stats,'pointsAgainst')??0);
+      const pfRaw=standingsStat(stats,'pointsFor');
+      const paRaw=standingsStat(stats,'pointsAgainst');
       const diffRaw=standingsStat(stats,'differential');
       const divRec=standingsStat(stats,'divisionRecord');
       const streak=standingsStat(stats,'streak');
-      next[key]={
+      const fallback=dashboardPointTotals(key);
+      const pf=pfRaw==null?fallback.pf:Number(pfRaw);
+      const pa=paRaw==null?fallback.pa:Number(paRaw);
+      const quality=[pfRaw,paRaw,diffRaw,divRec,streak].filter(v=>v!=null).length;
+      const candidate={
         w:wins,l:losses,t:ties,
         pct:pctRaw==null?((wins+.5*ties)/Math.max(1,wins+losses+ties)):Number(pctRaw),
         pf,pa,diff:diffRaw==null?(pf-pa):Number(diffRaw),
         div:divRec==null?'-':String(divRec),
         streak:streak==null?'-':String(streak),
-        text:`${wins}-${losses}${ties?'-'+ties:''}`
+        text:`${wins}-${losses}${ties?'-'+ties:''}`,
+        _quality:quality
       };
+      if(!next[key] || quality>=(next[key]._quality??-1)) next[key]=candidate;
     });
+    Object.values(next).forEach(x=>{delete x._quality;});
     if(Object.keys(next).length<28) throw new Error('Incomplete standings response');
     liveStandingsByKey=next;
     liveStandingsLoadedAt=new Date();
