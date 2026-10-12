@@ -209,6 +209,21 @@ body.dark .game.tripGame{border-color:#fbbf24}
 .fantasyImpactItem{font-size:13px;font-weight:850;white-space:nowrap}.fantasyImpactItem strong{color:#fde68a}
 @keyframes fantasyImpactMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
+/* V37 Week 8 Stadium Chasers countdown */
+.week8CountdownWrap{max-width:1400px;margin:0 auto;padding:0 20px 14px}
+.week8Countdown{position:relative;overflow:hidden;border:2px solid #facc15;border-radius:22px;padding:16px 18px;background:linear-gradient(135deg,#052e16 0%,#14532d 38%,#1d4ed8 100%);color:#fff;box-shadow:0 12px 30px rgba(29,78,216,.20),0 0 0 3px rgba(250,204,21,.10) inset;cursor:pointer}
+.week8Countdown:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 0%,rgba(250,204,21,.22),transparent 32%);pointer-events:none}
+.week8CountdownHead{position:relative;display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+.week8CountdownTitle{font-size:clamp(20px,2.6vw,34px);font-weight:950;letter-spacing:-.025em}
+.week8CountdownSub{font-size:12px;color:#dbeafe;font-weight:800;margin-top:4px}
+.week8CountdownBadge{border:1px solid rgba(255,255,255,.35);background:rgba(2,6,23,.35);border-radius:999px;padding:7px 11px;font-size:11px;font-weight:950;letter-spacing:.06em;white-space:nowrap}
+.week8CountdownClock{position:relative;display:grid;grid-template-columns:repeat(4,minmax(90px,1fr));gap:10px;margin-top:14px}
+.week8CountdownUnit{background:rgba(2,6,23,.55);border:1px solid rgba(255,255,255,.18);border-radius:15px;padding:10px;text-align:center}
+.week8CountdownNum{font-size:clamp(26px,4vw,42px);font-weight:950;line-height:1;color:#fef08a}
+.week8CountdownLabel{margin-top:5px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#bfdbfe;font-weight:900}
+.week8CountdownGames{position:relative;margin-top:10px;font-size:12px;font-weight:850;color:#fff}
+@media(max-width:620px){.week8CountdownClock{grid-template-columns:repeat(2,1fr)}}
+
 </style>
 </head>
 <body>
@@ -216,13 +231,31 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v36.7</div>
+    <div class="ver" id="cornerVersion">v37</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
   <div class="toolbar"><input id="search" class="search" placeholder="Search within selected week: team, city, network, or matchup..."/><select id="networkFilter"><option value="">All networks</option></select><label class="filterToggle"><input id="primeFilter" type="checkbox"/> Primetime / Special</label><button id="printWeek" class="themeToggle secondaryBtn" type="button">🖨️ Print Week</button><button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle light and dark mode">☀️ Light mode</button></div>
 </header>
 
+<div class="week8CountdownWrap">
+  <div id="week8Countdown" class="week8Countdown" role="button" tabindex="0" aria-label="Open Week 8 Stadium Chasers schedule">
+    <div class="week8CountdownHead">
+      <div>
+        <div class="week8CountdownTitle">🏟️ STADIUM CHASERS • WEEK 8 COUNTDOWN</div>
+        <div class="week8CountdownSub">The crew meets up for the Group Stadium Games</div>
+      </div>
+      <div class="week8CountdownBadge">GREEN BAY → DETROIT</div>
+    </div>
+    <div class="week8CountdownClock" aria-label="Countdown to Week 8 kickoff">
+      <div class="week8CountdownUnit"><div id="w8Days" class="week8CountdownNum">--</div><div class="week8CountdownLabel">Days</div></div>
+      <div class="week8CountdownUnit"><div id="w8Hours" class="week8CountdownNum">--</div><div class="week8CountdownLabel">Hours</div></div>
+      <div class="week8CountdownUnit"><div id="w8Minutes" class="week8CountdownNum">--</div><div class="week8CountdownLabel">Minutes</div></div>
+      <div class="week8CountdownUnit"><div id="w8Seconds" class="week8CountdownNum">--</div><div class="week8CountdownLabel">Seconds</div></div>
+    </div>
+    <div id="week8CountdownGames" class="week8CountdownGames">🏈 Panthers @ Packers • Thu Oct 29, 8:15 PM ET • Roman's Final NFL Stadium &nbsp; | &nbsp; 🏈 Vikings @ Lions • Sun Nov 1, 1:00 PM ET</div>
+  </div>
+</div>
 
 <div id="fantasyTickerWrap" class="fantasyTickerWrap">
   <div id="fantasyTicker" class="fantasyTicker">
@@ -511,11 +544,11 @@ async function syncCompletedWeeks(){
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '36.7',
+  version: '37',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 12, 2026 • Live Scoreboard minimize fixed',
+  lastUpdated: 'October 12, 2026 • Big Week 8 Stadium Chasers countdown added',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -679,6 +712,25 @@ function gameDateFromWeek(w,g){
 function weekFirstDate(w){return w.games.map(g=>gameDateFromWeek(w,g)).sort((a,b)=>a-b)[0] || new Date(w.start);}
 function weekCountdownParts(w){return diffParts(weekFirstDate(w).toISOString());}
 function weekCountdownText(w){const p=weekCountdownParts(w); return p?`${p.d}d ${p.h}h ${p.m}m`:'Started';}
+function updateWeek8Countdown(){
+  const target=new Date('2026-10-29T20:15:00-04:00');
+  let diff=target-new Date();
+  const ids=['w8Days','w8Hours','w8Minutes','w8Seconds'];
+  if(ids.some(id=>!$(id))) return;
+  if(diff<=0){
+    $('w8Days').textContent='00';$('w8Hours').textContent='00';$('w8Minutes').textContent='00';$('w8Seconds').textContent='00';
+    const g=$('week8CountdownGames'); if(g) g.textContent='🏟️ WEEK 8 IS HERE • STADIUM CHASERS UNITE!';
+    return;
+  }
+  let s=Math.floor(diff/1000);
+  const d=Math.floor(s/86400);s-=d*86400;
+  const h=Math.floor(s/3600);s-=h*3600;
+  const m=Math.floor(s/60);s-=m*60;
+  $('w8Days').textContent=String(d);
+  $('w8Hours').textContent=fmt(h);
+  $('w8Minutes').textContent=fmt(m);
+  $('w8Seconds').textContent=fmt(s);
+}
 function allGamesDated(){return weeks.flatMap(w=>w.games.map(g=>({week:w.week,range:w.range,game:g,date:gameDateFromWeek(w,g)})));}
 function nextGame(filter){const now=new Date();return allGamesDated().filter(x=>!scoreFor(x.game) && x.date>now && (!filter || filter(x))).sort((a,b)=>a.date-b.date)[0] || null;}
 function countdownLong(date){let diff=date-new Date(); if(diff<=0)return 'Started'; let s=Math.floor(diff/1000),d=Math.floor(s/86400);s-=d*86400;let h=Math.floor(s/3600);s-=h*3600;let m=Math.floor(s/60);return `${d} Days • ${h} Hours • ${m} Minutes`;}
@@ -837,6 +889,13 @@ function renderTeamSchedule(){
 }
 function render(){renderTabs();const w=weeks[currentWeek],q=$('search').value.toLowerCase(),net=$('networkFilter').value,primeOnly=$('primeFilter').checked;$('weekName').textContent=`Week ${w.week}`;$('weekRange').textContent=w.range;$('gameCount').textContent=`${w.games.length} games`;const p=weekCountdownParts(w);$('d').textContent=p?p.d:'0';$('h').textContent=p?fmt(p.h):'00';$('m').textContent=p?fmt(p.m):'00';$('s').textContent=p?fmt(p.s):'00';const filtered=w.games.filter(g=>(!q||gameText(g).includes(q))&&(!net||cleanNet(g[3])===net)&&(!primeOnly||isPrimeOrSpecial(g)));if(net){renderNetworkSeason(net,q,primeOnly);}else{renderGames(filtered,w);$('empty').style.display=filtered.length?'none':'block';}const ftb=$('footballTripBanner'); if(ftb) ftb.classList.toggle('show',w.week===8); renderWeekScoreboard(w);renderNextEvent();renderCommandCenter();renderTeamSchedule();renderDashboardStatus();}
 function applyTheme(mode){applyCommandTeamDarkPalette();document.body.classList.toggle('light',mode==='light');$('themeToggle').textContent=mode==='light'?'🌙 Dark mode':'☀️ Light mode';localStorage.setItem('nflDashTheme',mode);}
+updateWeek8Countdown();setInterval(updateWeek8Countdown,1000);
+const week8CountdownEl=$('week8Countdown');
+if(week8CountdownEl){
+  const openWeek8=()=>{const idx=weeks.findIndex(w=>w.week===8);if(idx>=0){showScheduleDashboard();currentWeek=idx;render();document.getElementById('weekName')?.scrollIntoView({behavior:'smooth',block:'start'});}};
+  week8CountdownEl.addEventListener('click',openWeek8);
+  week8CountdownEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openWeek8();}});
+}
 setInterval(()=>{document.querySelectorAll('[data-cd]').forEach(el=>el.textContent=weekCountdownText(weeks[+el.dataset.cd]));const p=weekCountdownParts(weeks[currentWeek]);$('d').textContent=p?p.d:'0';$('h').textContent=p?fmt(p.h):'00';$('m').textContent=p?fmt(p.m):'00';$('s').textContent=p?fmt(p.s):'00';renderNextEvent();renderCommandCenter();refreshGameCountdowns();},1000);
 $('search').addEventListener('input',render);$('networkFilter').addEventListener('change',render);$('primeFilter').addEventListener('change',render);$('printWeek').addEventListener('click',()=>window.print());$('teamSearch').addEventListener('input',renderTeamSchedule);$('commandTeamSelect').addEventListener('change',()=>{localStorage.setItem('nflCommandTeam',$('commandTeamSelect').value);applyCommandTeamDarkPalette();render();});$('themeToggle').addEventListener('click',()=>applyTheme(document.body.classList.contains('light')?'dark':'light'));
 
