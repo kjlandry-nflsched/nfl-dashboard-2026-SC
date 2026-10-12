@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v36.5</div>
+    <div class="ver" id="cornerVersion">v36.6</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -277,12 +277,12 @@ body.dark .game.tripGame{border-color:#fbbf24}
 </section>
 
 <section id="fantasyPanel" class="card" aria-label="Stadium Chasers fantasy scoreboard">
-  <div class="fantasyHead"><div><div class="nextLabel">ESPN Fantasy</div><div class="fantasyTitle">Stadium Chasers Fantasy</div><div id="fantasyMeta" class="fantasyMeta">Loading league matchups…</div></div><button id="fantasyRefresh" class="fantasyRefreshBtn" type="button">Refresh now</button></div>
+  <div class="fantasyHead"><div><div class="nextLabel">ESPN Fantasy</div><div class="fantasyTitle">Stadium Chasers Fantasy</div><div id="fantasyMeta" class="fantasyMeta">Loading league matchups…</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="fantasyRefresh" class="fantasyRefreshBtn" type="button">Refresh now</button><button id="fantasyMinimize" class="fantasyRefreshBtn" type="button">Minimize</button></div></div>
   <div id="fantasyGrid" class="fantasyGrid"></div>
 </section>
 
 <section id="liveScoreboardPanel" class="card" aria-label="Live NFL scoreboard">
-  <div class="liveScoreHead"><div><div class="nextLabel">NFL Live</div><div class="liveScoreTitle">Live Scoreboard</div><div id="liveScoreMeta" class="liveScoreMeta">Checking today's games…</div></div><button id="liveScoreRefresh" class="liveRefreshBtn" type="button">Refresh now</button></div>
+  <div class="liveScoreHead"><div><div class="nextLabel">NFL Live</div><div class="liveScoreTitle">Live Scoreboard</div><div id="liveScoreMeta" class="liveScoreMeta">Checking today's games…</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="liveScoreRefresh" class="liveRefreshBtn" type="button">Refresh now</button><button id="liveScoreMinimize" class="liveRefreshBtn" type="button">Minimize</button></div></div>
   <div id="liveScoreGrid" class="liveScoreGrid"></div>
 </section>
 
@@ -511,11 +511,11 @@ async function syncCompletedWeeks(){
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '36.5',
+  version: '36.6',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 11, 2026 • FF Player Live removed',
+  lastUpdated: 'October 11, 2026 • Fantasy and Live Scoreboard minimize controls added',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -1043,7 +1043,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
 <script>
 (function(){
   const nav=document.getElementById('liveScoreNav'),btn=document.getElementById('liveScoreBtn'),btnText=document.getElementById('liveScoreBtnText');
-  const panel=document.getElementById('liveScoreboardPanel'),grid=document.getElementById('liveScoreGrid'),meta=document.getElementById('liveScoreMeta'),refresh=document.getElementById('liveScoreRefresh');
+  const panel=document.getElementById('liveScoreboardPanel'),grid=document.getElementById('liveScoreGrid'),meta=document.getElementById('liveScoreMeta'),refresh=document.getElementById('liveScoreRefresh'),minimize=document.getElementById('liveScoreMinimize');
   if(!nav||!btn||!panel||!grid) return;
   let liveTimer=null;
   function espnUrl(){
@@ -1261,6 +1261,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
   }
   btn.addEventListener('click',()=>{panel.classList.toggle('open'); if(panel.classList.contains('open')) panel.scrollIntoView({behavior:'smooth',block:'start'});});
   refresh?.addEventListener('click',loadLive);
+  minimize?.addEventListener('click',()=>{panel.classList.remove('open');panel.dataset.openedOnce='1';nav.scrollIntoView({behavior:'smooth',block:'nearest'});});
   loadLive();
 })();
 </script>
@@ -1272,7 +1273,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
   const ticker=document.getElementById('fantasyTicker'), tickerItems=document.getElementById('fantasyTickerItems'),
     tickerMeta=document.getElementById('fantasyTickerMeta'), tickerBtn=document.getElementById('fantasyTickerBtn'),
     panel=document.getElementById('fantasyPanel'), grid=document.getElementById('fantasyGrid'),
-    meta=document.getElementById('fantasyMeta'), refresh=document.getElementById('fantasyRefresh'),
+    meta=document.getElementById('fantasyMeta'), refresh=document.getElementById('fantasyRefresh'), minimize=document.getElementById('fantasyMinimize'),
     impactWrap=document.getElementById('fantasyImpactWrap'), impactItems=document.getElementById('fantasyImpactItems'), impactScores=document.getElementById('fantasyImpactScores'), impactMeta=document.getElementById('fantasyImpactMeta');
   if(!ticker||!panel||!grid) return;
   let timer=null;
@@ -1417,6 +1418,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
   }
   tickerBtn?.addEventListener('click',()=>{panel.classList.toggle('open');if(panel.classList.contains('open'))panel.scrollIntoView({behavior:'smooth',block:'start'});});
   refresh?.addEventListener('click',loadFantasy);
+  minimize?.addEventListener('click',()=>{panel.classList.remove('open');ticker.scrollIntoView({behavior:'smooth',block:'nearest'});});
   loadFantasy();
 })();
 </script>
