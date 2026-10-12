@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v36.6</div>
+    <div class="ver" id="cornerVersion">v36.7</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -511,11 +511,11 @@ async function syncCompletedWeeks(){
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '36.6',
+  version: '36.7',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 11, 2026 • Fantasy and Live Scoreboard minimize controls added',
+  lastUpdated: 'October 12, 2026 • Live Scoreboard minimize fixed',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -1046,6 +1046,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
   const panel=document.getElementById('liveScoreboardPanel'),grid=document.getElementById('liveScoreGrid'),meta=document.getElementById('liveScoreMeta'),refresh=document.getElementById('liveScoreRefresh'),minimize=document.getElementById('liveScoreMinimize');
   if(!nav||!btn||!panel||!grid) return;
   let liveTimer=null;
+  let liveUserCollapsed=false;
   function espnUrl(){
     const now=new Date(), y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
     return 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates='+y+m+d;
@@ -1245,7 +1246,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       if(live.length){
         nav.classList.add('show');
         btnText.textContent='LIVE SCOREBOARD · '+live.length+' GAME'+(live.length===1?'':'S')+' IN PROGRESS';
-        if(!panel.dataset.openedOnce){panel.classList.add('open');panel.dataset.openedOnce='1';}
+        if(!liveUserCollapsed && !panel.dataset.openedOnce){panel.classList.add('open');panel.dataset.openedOnce='1';}
         if(!liveTimer) liveTimer=setInterval(loadLive,20000);
       }else{
         nav.classList.remove('show');
@@ -1254,14 +1255,27 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
     }catch(err){
       nav.classList.add('show');
       btnText.textContent='SCOREBOARD FEED STATUS';
-      panel.classList.add('open');
+      if(!liveUserCollapsed) panel.classList.add('open');
       grid.innerHTML='<div class="meta">Live score feed could not be reached from this browser.</div>';
       meta.textContent=err.message+' · '+new Date().toLocaleTimeString();
     }
   }
-  btn.addEventListener('click',()=>{panel.classList.toggle('open'); if(panel.classList.contains('open')) panel.scrollIntoView({behavior:'smooth',block:'start'});});
+  btn.addEventListener('click',()=>{
+    const opening=!panel.classList.contains('open');
+    liveUserCollapsed=!opening;
+    panel.classList.toggle('open',opening);
+    panel.dataset.openedOnce='1';
+    if(opening) panel.scrollIntoView({behavior:'smooth',block:'start'});
+  });
   refresh?.addEventListener('click',loadLive);
-  minimize?.addEventListener('click',()=>{panel.classList.remove('open');panel.dataset.openedOnce='1';nav.scrollIntoView({behavior:'smooth',block:'nearest'});});
+  minimize?.addEventListener('click',(e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    liveUserCollapsed=true;
+    panel.dataset.openedOnce='1';
+    panel.classList.remove('open');
+    setTimeout(()=>nav.scrollIntoView({behavior:'smooth',block:'nearest'}),0);
+  });
   loadLive();
 })();
 </script>
