@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v36.1</div>
+    <div class="ver" id="cornerVersion">v36.2</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -442,14 +442,80 @@ const completedScores = {
 'Pittsburgh Steelers at Cleveland Browns':[24,27]
 };
 function scoreFor(g){return completedScores[g[0]]||null;}
+
+async function syncFinalScoresForWeek(w){
+  if(!w || isWeekComplete(w)) return false;
+  const due=w.games.map((g,i)=>({g,i,date:gameDateFromWeek(w,g)})).filter(x=>x.date && x.date<=new Date());
+  if(!due.length) return false;
+  const keys=[...new Set(due.map(x=>easternDateKey(x.date)))];
+  let changed=false;
+  for(const key of keys){
+    try{
+      const r=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates='+key,{cache:'no-store'});
+      if(!r.ok) continue;
+      const d=await r.json();
+      for(const ev of (d.events||[])){
+        const comp=ev.competitions?.[0];
+        const status=String(ev.status?.type?.state||'').toLowerCase();
+        const completed=ev.status?.type?.completed===true || status==='post';
+        if(!completed) continue;
+        const cs=comp?.competitors||[];
+        if(cs.length<2) continue;
+        const abs=cs.map(x=>normEspnAbbr(x.team?.abbreviation||''));
+        const target=due.find(x=>{
+          const wanted=teamsInGame(x.g).map(teamAbbr).map(normEspnAbbr);
+          return wanted.length===2 && wanted.every(a=>abs.includes(a));
+        });
+        if(!target) continue;
+        const teams=teamsInGame(target.g).map(teamAbbr).map(normEspnAbbr);
+        const scores=teams.map(ab=>{
+          const row=cs.find(x=>normEspnAbbr(x.team?.abbreviation||'')===ab);
+          return Number(row?.score);
+        });
+        if(scores.length===2 && scores.every(Number.isFinite)){
+          const prev=completedScores[target.g[0]];
+          if(!prev || prev[0]!==scores[0] || prev[1]!==scores[1]){
+            completedScores[target.g[0]]=scores;
+            changed=true;
+          }
+        }
+      }
+    }catch(e){}
+  }
+  return changed;
+}
+
+let finalScoreSyncTimer=null;
+async function syncCompletedWeeks(){
+  const now=new Date();
+  let changed=false;
+  for(const w of weeks){
+    if(isWeekComplete(w)) continue;
+    const first=weekFirstDate(w);
+    if(!first || first>now) continue;
+    if(await syncFinalScoresForWeek(w)) changed=true;
+  }
+  if(changed){
+    const wasCurrent=weeks[currentWeek];
+    renderTabs();
+    if(wasCurrent && isWeekComplete(wasCurrent)){
+      currentWeek=currentActiveWeekIndex();
+    }
+    render();
+    renderStandings();
+  }else{
+    renderTabs();
+  }
+  if(!finalScoreSyncTimer) finalScoreSyncTimer=setInterval(syncCompletedWeeks,120000);
+}
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '36.1',
+  version: '36.2',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 9, 2026 • Live standings PF and PA fixed',
+  lastUpdated: 'October 11, 2026 • Completed weeks now auto-sync from ESPN finals',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -971,7 +1037,7 @@ function renderBuckets(){const member=selectedStadiumMember()||'Kenny';const nob
 function renderStadiumAttendance(){initStadiumFilters();renderMemberSpotlight();const rows=filteredStadiumRows();renderStadiumStats(rows);renderLeaderboard();renderMiniMap();renderStadiumTable(rows);renderBuckets();}
 
 $('boxScoreClose').addEventListener('click',closeBoxScore);$('boxScoreModal').addEventListener('click',e=>{if(e.target===$('boxScoreModal'))closeBoxScore();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBoxScore();});
-renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsControls();loadLiveStandings(false);applyTheme(localStorage.getItem('nflDashTheme')||'dark');render();
+renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsControls();loadLiveStandings(false);syncCompletedWeeks();applyTheme(localStorage.getItem('nflDashTheme')||'dark');render();
 </script>
 
 <script>
