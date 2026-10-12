@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v36.2</div>
+    <div class="ver" id="cornerVersion">v36.3</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -511,11 +511,11 @@ async function syncCompletedWeeks(){
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '36.2',
+  version: '36.3',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 11, 2026 • Completed weeks now auto-sync from ESPN finals',
+  lastUpdated: 'October 11, 2026 • Live scoreboard box score buttons added',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -1055,6 +1055,37 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
   function team(c,where){return (c.competitors||[]).find(x=>x.homeAway===where)||{}}
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function detail(e){return e?.status?.type?.shortDetail||e?.status?.type?.detail||''}
+  window.openLiveBoxScore=async function(eventId){
+    const modal=document.getElementById('boxScoreModal'),body=document.getElementById('boxScoreBody'),title=document.getElementById('boxScoreTitle');
+    if(!modal||!body||!title||!eventId) return;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    title.textContent='Live NFL Box Score';
+    body.innerHTML='<div class="boxError">Loading live box score and player statistics…</div>';
+    try{
+      const sum=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event='+encodeURIComponent(eventId),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('summary');return r.json();});
+      const hc=sum.header?.competitions?.[0]||{};
+      const cs=hc.competitors||[];
+      const away=cs.find(x=>x.homeAway==='away')||cs[0]||{};
+      const home=cs.find(x=>x.homeAway==='home')||cs[1]||{};
+      const state=sum.header?.competitions?.[0]?.status?.type?.state||'';
+      const statusText=state==='in'?'LIVE':state==='post'?'FINAL':'GAME';
+      title.textContent=(away.team?.abbreviation||'Away')+' at '+(home.team?.abbreviation||'Home')+' • '+statusText;
+      const periods=Math.max(linescoreFor(away).length,linescoreFor(home).length,4);
+      const qh=Array.from({length:periods},(_,i)=>'<th>'+(i<4?'Q'+(i+1):'OT'+(i-3))+'</th>').join('');
+      const quarter='<table class="quarterTable"><thead><tr><th>Team</th>'+qh+'<th>T</th></tr></thead><tbody><tr><td>'+escapeHtml(away.team?.abbreviation||'')+'</td>'+linescoreFor(away).map(v=>'<td>'+v+'</td>').join('')+'<td><b>'+escapeHtml(away.score??'—')+'</b></td></tr><tr><td>'+escapeHtml(home.team?.abbreviation||'')+'</td>'+linescoreFor(home).map(v=>'<td>'+v+'</td>').join('')+'<td><b>'+escapeHtml(home.score??'—')+'</b></td></tr></tbody></table>';
+      const bt=sum.boxscore?.teams||[];
+      const awayStats=statMap(bt.find(t=>t.team?.id===away.team?.id)?.statistics),homeStats=statMap(bt.find(t=>t.team?.id===home.team?.id)?.statistics);
+      const statKeys=['totalYards','netPassingYards','rushingYards','firstDowns','thirdDownEff','turnovers','totalPenaltiesYards','possessionTime'];
+      const statLabels={totalYards:'Total Yards',netPassingYards:'Passing Yards',rushingYards:'Rushing Yards',firstDowns:'First Downs',thirdDownEff:'3rd Down',turnovers:'Turnovers',totalPenaltiesYards:'Penalties-Yards',possessionTime:'Time of Possession'};
+      const statsRows=statKeys.map(k=>'<tr><td>'+statLabels[k]+'</td><td>'+escapeHtml(awayStats[k]||'—')+'</td><td>'+escapeHtml(homeStats[k]||'—')+'</td></tr>').join('');
+      const players=sum.boxscore?.players||[];
+      const aPlayers=players.find(p=>p.team?.id===away.team?.id),hPlayers=players.find(p=>p.team?.id===home.team?.id);
+      body.innerHTML='<div class="boxScoreHeader"><div><div class="boxTeamName">'+escapeHtml(away.team?.displayName||'Away')+'</div><div class="meta">'+escapeHtml(away.records?.[0]?.summary||'')+'</div></div><div><div class="boxFinal">'+statusText+'</div><div class="boxBigScore">'+escapeHtml(away.score??'—')+' – '+escapeHtml(home.score??'—')+'</div></div><div><div class="boxTeamName">'+escapeHtml(home.team?.displayName||'Home')+'</div><div class="meta">'+escapeHtml(home.records?.[0]?.summary||'')+'</div></div></div>'+quarter+'<div class="boxSection"><h3>Team Comparison</h3><table class="statTable"><thead><tr><th>Stat</th><th>'+escapeHtml(away.team?.abbreviation||'')+'</th><th>'+escapeHtml(home.team?.abbreviation||'')+'</th></tr></thead><tbody>'+statsRows+'</tbody></table></div><div class="boxTeamsGrid"><div class="boxTeamPanel"><div class="boxTeamName">'+escapeHtml(away.team?.displayName||'Away')+'</div>'+playerCategoryHtml(aPlayers,'passing','Passing')+playerCategoryHtml(aPlayers,'rushing','Rushing')+playerCategoryHtml(aPlayers,'receiving','Receiving')+'</div><div class="boxTeamPanel"><div class="boxTeamName">'+escapeHtml(home.team?.displayName||'Home')+'</div>'+playerCategoryHtml(hPlayers,'passing','Passing')+playerCategoryHtml(hPlayers,'rushing','Rushing')+playerCategoryHtml(hPlayers,'receiving','Receiving')+'</div></div><div class="boxSource">Live statistics refresh when you reopen this box score. Source: ESPN public game data.</div>';
+    }catch(err){
+      body.innerHTML='<div class="boxError"><b>Live box score could not be loaded.</b><br><br>Try again in a few seconds.</div>';
+    }
+  };
   const bigWrap=document.getElementById('bigPlayWrap'),bigItems=document.getElementById('bigPlayItems'),bigMeta=document.getElementById('bigPlayMeta'),bigBtn=document.getElementById('bigPlayBtn'),bigPanel=document.getElementById('bigPlayPanel'),bigList=document.getElementById('bigPlayList'),bigPanelMeta=document.getElementById('bigPlayPanelMeta');
   let lastBigPlaySignature='';
   function allDrivePlays(summary){
@@ -1165,6 +1196,7 @@ renderFilters();renderCommandTeamOptions();initCommandTabs();initStandingsContro
       '<div class="liveTeamRow"><div class="liveTeam">'+esc(away.team?.displayName||'Away')+'</div><div class="liveScore">'+esc(away.score??'—')+'</div></div>'+
       '<div class="liveTeamRow"><div class="liveTeam">'+esc(home.team?.displayName||'Home')+'</div><div class="liveScore">'+esc(home.score??'—')+'</div></div>'+
       '<div class="liveDetails">'+esc(networks||'NFL')+(c.venue?.fullName?' · '+esc(c.venue.fullName):'')+'</div>'+
+      '<div class="details" style="margin-top:10px"><button class="boxScoreBtn" type="button" onclick="openLiveBoxScore(\''+esc(e.id||'')+'\')">'+(st==='in'?'LIVE BOX SCORE ›':'BOX SCORE ›')+'</button></div>'+
       '<div id="'+tickerId+'" class="liveGameTicker"><div class="liveGameTickerLabel">Game Big Plays</div><div class="liveGameTickerTrack"><div class="liveGameTickerItems"></div></div></div></article>';
   }
   async function loadLive(){
