@@ -170,8 +170,8 @@ body.dark .game.tripGame{border-color:#fbbf24}
 
 
 /* V32 Big Plays ticker */
-.bigPlayWrap{display:none;max-width:1400px;margin:0 auto;padding:0 20px 10px}
-.bigPlayWrap.show{display:block}
+.bigPlayWrap{display:none!important;max-width:1400px;margin:0 auto;padding:0 20px 10px}
+.bigPlayWrap.show{display:none!important}
 .bigPlayTicker{border:1px solid #f59e0b;background:linear-gradient(135deg,#451a03,#b45309 55%,#111827);color:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(245,158,11,.17)}
 .bigPlayTop{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.14)}
 .bigPlayTitle{font-weight:950;letter-spacing:.06em;white-space:nowrap}.bigPlayMeta{font-size:11px;color:#fde68a;white-space:nowrap}
@@ -216,7 +216,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v36.3</div>
+    <div class="ver" id="cornerVersion">v36.4</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -511,11 +511,11 @@ async function syncCompletedWeeks(){
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '36.3',
+  version: '36.4',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'October 11, 2026 • Live scoreboard box score buttons added',
+  lastUpdated: 'October 11, 2026 • Global Big Play ticker removed',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
