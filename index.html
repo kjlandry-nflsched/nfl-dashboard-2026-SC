@@ -235,7 +235,7 @@ body.dark .game.tripGame{border-color:#fbbf24}
   <h1><span class="gold">2026 NFL</span> Schedule Dashboard</h1>
   <div class="sub">Weekly Schedule • Team Search • Countdown Tracker</div>
   <aside class="cornerStatus" aria-label="Dashboard version status">
-    <div class="ver" id="cornerVersion">v38.1</div>
+    <div class="ver" id="cornerVersion">v38.2</div>
     <div class="stampLabel">Last Updated</div>
     <div class="stamp" id="cornerLastUpdated">October 4, 2026 • Live game cards + Stadium Chasers fantasy</div>
   </aside>
@@ -542,11 +542,11 @@ async function syncCompletedWeeks(){
 function finalScoreMarkup(g){const s=scoreFor(g);if(!s)return '';return `<div class="finalScore"><span class="scoreLabel">Final</span><span class="scoreValue">${s[0]} - ${s[1]}</span></div>`;}
 function teamRecord(key){let w=0,l=0,t=0;weeks.forEach(week=>week.games.forEach(g=>{const sc=scoreFor(g);if(!sc||!teamMatchesGame(key,g))return;const teams=teamsInGame(g);if(teams.length<2)return;const idx=teams.indexOf(key);if(idx<0)return;const a=sc[idx],b=sc[1-idx];if(a>b)w++;else if(a<b)l++;else t++;}));return {w,l,t,text:`${w}-${l}${t?'-'+t:''}`};}
 const dashboardMeta = {
-  version: '38.1',
+  version: '38.2',
   label: 'Live NFL + Fantasy Impact Edition',
   updatedThrough: 'Week 4 - Thursday Night Football',
   currentWeekLabel: 'Week 4',
-  lastUpdated: 'November 5, 2026 • Season progress now calculated from actual completed games',
+  lastUpdated: 'November 5, 2026 • Command Center standings now use live standings data',
   maintainedBy: 'Kenny Landry',
   completedGames: 48
 };
@@ -829,7 +829,8 @@ function renderCommandCenter(){
   $('commandHero').innerHTML=`<div class="teamBadge">${teamAbbr(key)}</div><div><div class="commandHeroTitle">${display} Command Center</div><div class="commandHeroMeta">Record: ${teamRecord(key).text} • ${division} • Favorite team saved on this station</div><div class="commandHeroMeta">Next Game: ${next?`Week ${next.week} — ${next.game[0]} (${next.game[1]} ${next.game[2]}, ${next.game[3]})`:'TBD'}</div></div><div class="commandHeroCountdown"><div class="lbl">Next ${shortName} Game</div><div class="value">${next?countdownLong(next.date):'TBD'}</div></div>`;
   $('steelersStats').innerHTML=`<div class="statBox"><div class="lbl">Next ${shortName} Game</div><div class="statValue">${next?countdownLong(next.date):'TBD'}</div><div class="meta">${next?`Week ${next.week}: ${next.game[0]}`:`No upcoming ${display} game found.`}</div></div><div class="statBox"><div class="lbl">Scheduled Games</div><div class="statValue">${games.length}</div><div class="meta">Weeks 1 through 18</div></div><div class="statBox"><div class="lbl">Primetime / Special Windows</div><div class="statValue">${prime}</div><div class="meta">Thursday, Friday, Saturday, Sunday night, Monday, international, or holiday windows</div></div><div class="statBox"><div class="lbl">${division} Games</div><div class="statValue">${divGames}</div><div class="meta">Division matchups for ${display}</div></div>`;
   const divTeams=Object.keys(teamDivisions).filter(k=>teamDivisions[k]===division).sort((a,b)=>teamName(a).localeCompare(teamName(b)));
-  $('divisionBoard').innerHTML=`<div class="lbl">${division} Standings Starter</div><div class="meta">Records are set to 0-0 until results are manually updated or live-score support is added.</div><div class="divisionTeams">${divTeams.map(k=>`<span class="divisionChip">${teamAbbr(k)} ${teamName(k)}: ${teamRecord(k).text}</span>`).join('')}</div>`;
+  const liveDivTeams=divTeams.slice().sort((a,b)=>{const A=standingsStats(a),B=standingsStats(b);return (B.pct-A.pct)||(B.w-A.w)||(B.diff-A.diff)||(B.pf-A.pf);});
+  $('divisionBoard').innerHTML=`<div class="lbl">${division} Standings</div><div class="meta">Live division records from the NFL standings feed.</div><div class="divisionTeams">${liveDivTeams.map(k=>{const st=standingsStats(k);return `<span class="divisionChip">${teamAbbr(k)} ${teamName(k)}: ${st.text}</span>`;}).join('')}</div>`;
   const primeGames=games.filter(x=>isPrimeOrSpecial(x.game));
   if($('primeBoard')) $('primeBoard').innerHTML=`<div class="lbl">${shortName} Primetime / Special Games</div><div class="meta">Quick view of night, holiday, Saturday, Friday, Thursday, and international windows.</div><div class="primeStrip">${primeGames.map(x=>`<div class="primeItem"><div class="wk">Week ${x.week}</div><div class="matchLine">${matchupWithBadges(x.game)}</div>${scoreFor(x.game)?finalScoreMarkup(x.game):gameCountdownMarkup(x.date)}<div class="details"><span class="tag">${x.game[1]}</span><span class="tag">${x.game[2]}</span><span class="tag network">${x.game[3]}</span></div></div>`).join('')||'<div class="meta">No primetime/special games found.</div>'}</div>`;
   if($('scheduleSummaryTitle')) $('scheduleSummaryTitle').textContent=`Show ${display} Full Schedule (${games.length} Games)`;
